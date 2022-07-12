@@ -67,7 +67,7 @@ class DailyForecast:
 
 if __name__=='__main__':
     url = r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=3"
-    ini = DairyForecast(url)
+    ini = DailyForecast(url)
     print(ini.wind())
     # g = get_linked_urls(url)
     # for i in g: print(i)
