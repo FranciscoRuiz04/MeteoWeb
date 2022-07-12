@@ -2,13 +2,17 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import sys
+import os
+from dotenv import load_dotenv as env
+
+env()   #Get constant values from .env file
 
 def genLinks(item):
     for i in item:
         links = i.find('a')
         path = links.get('href')
         if path and path.startswith('/'):
-            path = 'https://www.meteoblue.com' + path
+            path = os.getenv('main') + path
         yield path
 
 def get_linked_urls(url):
@@ -73,9 +77,10 @@ class DailyForecast:
         patTag = self.tag.find(class_='tab-predictability')['title']
         level = patTag.split(':')[1].strip().upper()
         return level
+    
 
 if __name__=='__main__':
-    url = r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=5"
+    url = os.getenv('starturl')
     ini = DailyForecast(url)
     print(ini.date())
     # g = get_linked_urls(url)

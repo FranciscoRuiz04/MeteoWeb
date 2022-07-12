@@ -8,6 +8,7 @@ selenium = "*"
 beautifulsoup4 = "*"
 pandas = "*"
 requests = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
