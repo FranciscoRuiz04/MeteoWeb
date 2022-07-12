@@ -44,15 +44,15 @@ class DailyForecast:
     
     # @decorator
     def date(self):
-        lab = self.tag.find('time')
-        content = lab.get('datetime')
+        tag = self.tag.find('time')
+        content = tag.get('datetime')
         return content
     
     # @decorator
     def tmp(self):
-        max = self.tag.find(class_='tab-temp-max').text.strip()[:-3]
-        min = self.tag.find(class_='tab-temp-min').text.strip()[:-3]
-        return (int(min), int(max))
+        maxTmp = self.tag.find(class_='tab-temp-maxTmp').text.strip()[:-3]
+        minTmp = self.tag.find(class_='tab-temp-minTmp').text.strip()[:-3]
+        return (int(minTmp), int(maxTmp))
     
     # @decorator
     def wind(self):
@@ -62,12 +62,21 @@ class DailyForecast:
         return (speed, direction)
     
     def precip(self):
-        pass
-
+        tag = self.tag.find(class_='tab-precip').text.strip()[:-3].split('-')
+        return (tag[0], tag[1])
+    
+    def sunhrs(self):
+        tag = self.tag.find(class_='tab-sun').text.strip()[:-2]
+        return tag
+    
+    def previsibility(self):
+        patTag = self.tag.find(class_='tab-predictability')['title']
+        level = patTag.split(':')[1].strip().upper()
+        return level
 
 if __name__=='__main__':
-    url = r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=3"
+    url = r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=5"
     ini = DailyForecast(url)
-    print(ini.wind())
+    print(ini.date())
     # g = get_linked_urls(url)
     # for i in g: print(i)
