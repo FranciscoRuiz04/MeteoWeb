@@ -20,7 +20,7 @@ def get_linked_urls(url):
         yield link
 
 
-class DairyForecast:
+class DailyForecast:
     
     def __init__(self, url, className = "tab active"):
         self.url = url
