@@ -36,52 +36,52 @@ class DailyForecast:
         else:
             _soup = BeautifulSoup(_req.content, 'html.parser')
             self.tag = _soup.find(class_=self._class)
-    
-    # def decorator(fun):
-    #     def wrap(self):
-    #         global _label
-    #         req = requests.get(self.url)
-    #         soup = BeautifulSoup(req.content, 'html.parser')
-    #         _label = soup.find(class_=self._class)
-    #         return fun()
-    #     return wrap    
-    
-    # @decorator
+        
     def date(self):
         tag = self.tag.find('time')
         content = tag.get('datetime')
-        return content
+        self.d = content
+        return self.d
     
-    # @decorator
     def tmp(self):
-        maxTmp = self.tag.find(class_='tab-temp-maxTmp').text.strip()[:-3]
-        minTmp = self.tag.find(class_='tab-temp-minTmp').text.strip()[:-3]
-        return (int(minTmp), int(maxTmp))
+        maxTmp = self.tag.find(class_='tab-temp-max').text.strip()[:-3]
+        minTmp = self.tag.find(class_='tab-temp-min').text.strip()[:-3]
+        self.temp = (int(minTmp), int(maxTmp))
+        return self.temp
     
-    # @decorator
     def wind(self):
         patTag = self.tag.find(class_='wind')
         speed = patTag.text.strip()[:-5]
         direction = patTag.span['class'][-1]
-        return (speed, direction)
+        self.w = (speed, direction)
+        return self.w
     
     def precip(self):
-        tag = self.tag.find(class_='tab-precip').text.strip()[:-3].split('-')
-        return (tag[0], tag[1])
+        value = self.tag.find(class_='tab-precip').text.strip()[:-3].split('-')
+        self.p = (value[0], value[1])
+        return self.p
     
     def sunhrs(self):
-        tag = self.tag.find(class_='tab-sun').text.strip()[:-2]
-        return tag
+        value = self.tag.find(class_='tab-sun').text.strip()[:-2]
+        self.sun = value
+        return self.sun
     
     def previsibility(self):
         patTag = self.tag.find(class_='tab-predictability')['title']
         level = patTag.split(':')[1].strip().upper()
-        return level
+        self.prev = level
+        return self.prev
     
+    def predict(self):
+        self.date()
+        self.tmp()
+        self.wind()
+        self.precip()
+        self.sunhrs()
+        self.previsibility()
 
 if __name__=='__main__':
     url = os.getenv('starturl')
     ini = DailyForecast(url)
-    print(ini.date())
-    # g = get_linked_urls(url)
-    # for i in g: print(i)
+    ini.predict()
+    print(ini.temp)
