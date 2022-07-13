@@ -16,7 +16,7 @@ def _genLinks(item):
         links = i.find('a')
         path = links.get('href')
         if path and path.startswith('/'):
-            path = os.getenv('main') + path
+            path = os.getenv('mainurl') + path
         yield path
 
 
@@ -136,9 +136,11 @@ class DailyForecast:
 
 
 if __name__ == '__main__':
-    url = os.getenv('starturl')
-    ini = DailyForecast(url)
-    ini.predict()
-    ini.date
-    print(ini.precip, ini.temp, ini.wind,
-          ini.date, ini.sun, ini.prev, sep=' / ')
+    # url = os.getenv('starturl')
+    # ini = DailyForecast(url)
+    # ini.predict()
+    # ini.date
+    # print(ini.precip, ini.temp, ini.wind,
+    #       ini.date, ini.sun, ini.prev, sep=' / ')
+    for u in get_linked_urls(os.getenv('mainurl')):
+        print(u)
