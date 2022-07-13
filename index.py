@@ -2,8 +2,6 @@
 
 import requests
 from bs4 import BeautifulSoup
-import pandas as pd
-import sys
 import os
 from dotenv import load_dotenv as env
 #--------------------------------------------------------------#
@@ -59,7 +57,8 @@ class DailyForecast:
 
     def tmp(self):
         """
-        Get the temperature range from the text within two different tags (tab-temp-max, tab-temp-min)
+        Get the temperature range from the text within 
+        two different tags (tab-temp-max, tab-temp-min)
         A tuple is the outcome with the next format: (Min, Max)
         Both values are float type
         """
