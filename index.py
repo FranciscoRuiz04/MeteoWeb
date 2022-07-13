@@ -12,6 +12,7 @@ env()  # Get constant values from .env file
 
 ########################    Generators    ########################
 
+
 def genLinks(item):
     for i in item:
         links = i.find('a')
@@ -45,7 +46,7 @@ class DailyForecast:
             _soup = BeautifulSoup(_req.content, 'html.parser')
             self.tag = _soup.find(class_=self._class)
 
-    def date(self):
+    def date_fun(self):
         """
         Get dates from 'time' tag.
         Outcome format is as follows: YYYY-MM-DD
@@ -53,8 +54,8 @@ class DailyForecast:
         """
         tag = self.tag.find('time')
         content = tag.get('datetime')
-        self.d = content
-        return self.d
+        self.date = content
+        return self.date
 
     def tmp(self):
         """
@@ -67,7 +68,7 @@ class DailyForecast:
         self.temp = (int(minTmp), int(maxTmp))
         return self.temp
 
-    def wind(self):
+    def wind_fun(self):
         """
         Get the text within tag with 'wind' as class name
         A tuple is the outcome with the next format: (Speed, Dir)
@@ -77,10 +78,10 @@ class DailyForecast:
         patTag = self.tag.find(class_='wind')
         speed = patTag.text.strip()[:-5]
         direction = patTag.span['class'][-1]
-        self.w = (speed, direction)
-        return self.w
+        self.wind = (int(speed), direction)
+        return self.wind
 
-    def precip(self):
+    def precip_fun(self):
         """
         Get precipitation from tag with 'tab-precip' class name
         Two kind of tuples could get:
@@ -90,27 +91,47 @@ class DailyForecast:
         values = [l.strip() for l in self.tag.find(
             class_='tab-precip').text.split('-')]
         try:
-            self.p = (int(values[0]), int(values[1][:-3]))
+            self.precip = (int(values[0]), int(values[1][:-3]))
         except:
-            self.p = (None, None)
-        return self.p
+            self.precip = (None, None)
+        return self.precip
 
     def sunhrs(self):
+        """
+        Get sun hours from tag with 'tab-sun' class name
+        Output data type is integer
+        """
         value = self.tag.find(class_='tab-sun').text.strip()[:-2]
-        self.sun = value
+        self.sun = int(value)
         return self.sun
 
     def previsibility(self):
+        """
+        Get previsibility from tag with 'tab-predictability' class name
+        Grade of previsibility as outcome
+        Data type outcome is string
+        """
         patTag = self.tag.find(class_='tab-predictability')['title']
         level = patTag.split(':')[1].strip().upper()
         self.prev = level
         return self.prev
 
     def predict(self):
-        self.date()
+        """
+        Fetch all the variables considered by the class with just
+        run this function.
+        Variables will be saved in:
+        self.date = Date
+        self.temp = Temp Range
+        self.wind = Wind Speed
+        self.precip = Precipitation Range
+        self.sun = Sun hours
+        self.prev = Grade of previsibility
+        """
+        self.date_fun()
         self.tmp()
-        self.wind()
-        self.precip()
+        self.wind_fun()
+        self.precip_fun()
         self.sunhrs()
         self.previsibility()
 
@@ -120,4 +141,5 @@ if __name__ == '__main__':
     ini = DailyForecast(url)
     ini.predict()
     ini.date
-    print(ini.p, ini.temp, ini.w, ini.d, ini.sun, ini.prev, sep=' / ')
+    print(ini.precip, ini.temp, ini.wind,
+          ini.date, ini.sun, ini.prev, sep=' / ')
