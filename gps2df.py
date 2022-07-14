@@ -5,7 +5,6 @@ import gps4cast as fc
 from dotenv import load_dotenv as env
 import os
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 #--------------------------------------------------------------#
 
 env()  # Get constant values from .env file
