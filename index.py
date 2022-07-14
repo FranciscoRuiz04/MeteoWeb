@@ -1,17 +1,25 @@
+########################    Packages    ########################
+
 import pandas as pd
 import gps4cast as fc
 from dotenv import load_dotenv as env
 import os
 from concurrent.futures import ThreadPoolExecutor
+#--------------------------------------------------------------#
 
-env()
+env()   #Get constant values from .env file
 
 _main = os.getenv('starturl')
 _urls = fc.get_linked_urls(_main)
 
+########################    Functions    ########################
+
 
 def decorator(function):
     def tab4cast(url):
+        """
+        Generate a list with the values fetched from web page
+        """
         try:
             data = function(url)
             data.predict()
@@ -28,17 +36,30 @@ def decorator(function):
 
 @decorator
 def normTab(url):
+    """
+    Extract xml format content from 6 firsts days forecast
+    within <<tab>> tag
+    """
     data = fc.Daily4cast(url)
     return data
 
 
 @decorator
 def lastTab(url):
+    """
+    Extract xml format content from last day forecast
+    within <<tab>> tag
+    """
     data = fc.Last4cast(url)
     return data
 
 
 def run():
+    """
+    Extract a dataframe type object with all the information about
+    daily forecast ordered by date, using multiple-threads with
+    threadpool.
+    """
     recs = []
     with ThreadPoolExecutor(max_workers=3) as exec:
         for n, url in enumerate(_urls):
@@ -51,6 +72,7 @@ def run():
                       "Date", "Tmin", "Tmax", "WSpeed", "Precip", "Sun", "Prev"])
     df.sort_values(by='Date', ascending=True)
     return df
+#--------------------------------------------------------------#
 
 
 if __name__ == '__main__':
