@@ -7,7 +7,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 #--------------------------------------------------------------#
 
-env()   #Get constant values from .env file
+env()  # Get constant values from .env file
 
 _main = os.getenv('starturl')
 _urls = fc.get_linked_urls(_main)
