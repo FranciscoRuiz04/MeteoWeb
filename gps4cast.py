@@ -1,5 +1,6 @@
 ########################    Packages    ########################
 
+import sys
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -31,7 +32,7 @@ def get_linked_urls(url):
 
 ########################    Classes    ########################
 
-class DailyForecast:
+class Daily4cast:
 
     def __init__(self, url, className="tab active"):
         self.url = url
@@ -43,6 +44,7 @@ class DailyForecast:
         else:
             _soup = BeautifulSoup(_req.content, 'html.parser')
             self.tag = _soup.find(class_=self._class)
+            self.html = _soup
 
     def date_fun(self):
         """
@@ -135,12 +137,15 @@ class DailyForecast:
         self.previsibility()
 
 
+class Last4cast(Daily4cast):
+    def __init__(self, url, className="tab active last"):
+        Daily4cast.__init__(self, url, className)
+
+
 if __name__ == '__main__':
-    # url = os.getenv('starturl')
-    # ini = DailyForecast(url)
-    # ini.predict()
-    # ini.date
-    # print(ini.precip, ini.temp, ini.wind,
-    #       ini.date, ini.sun, ini.prev, sep=' / ')
-    for u in get_linked_urls(os.getenv('mainurl')):
-        print(u)
+    ini = Daily4cast(
+        r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=1", 'tab active last')
+    print(ini.tag)
+    ini = Last4cast(
+        r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=7")
+    print(ini.tag)
