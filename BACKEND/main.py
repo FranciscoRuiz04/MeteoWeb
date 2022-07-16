@@ -36,4 +36,4 @@ for place in places:
     name = place["city"]
     toFile(path=targetPath, mainurl=url, cityname=name)
 
-# toFile(r"C:/DailyForecast_test", "https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270",'guanas')
+# toFile(os.getenv('testdir'), os.getenv('starturl'), 'Guanajuato')
