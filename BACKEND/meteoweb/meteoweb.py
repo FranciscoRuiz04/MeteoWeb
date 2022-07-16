@@ -2,7 +2,7 @@
 
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv as env
+# from dotenv import load_dotenv as env
 #--------------------------------------------------------------#
 
 # env()  # Get enviroment variables from .env file

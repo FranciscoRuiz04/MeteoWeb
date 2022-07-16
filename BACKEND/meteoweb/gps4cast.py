@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from . import meteoweb as mw
-from dotenv import load_dotenv as env
+# from dotenv import load_dotenv as env
 import os
 from concurrent.futures import ThreadPoolExecutor
 #--------------------------------------------------------------#

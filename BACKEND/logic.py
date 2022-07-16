@@ -1,7 +1,7 @@
 ########################    Packages    ########################
 
 import json
-from dotenv import load_dotenv as env
+# from dotenv import load_dotenv as env
 from meteoweb import gps4cast
 from datetime import datetime
 import os
