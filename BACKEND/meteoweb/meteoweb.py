@@ -128,9 +128,10 @@ class Last4cast(Daily4cast):
 
 
 if __name__ == '__main__':
+    import os
     # ini = Daily4cast(
-    #     r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=1", 'tab active last')
+    #     os.getenv('starturl'), 'tab active last')
     # print(ini.tag)
     ini = Last4cast(
-        r"https://www.meteoblue.com/es/tiempo/semana/san-miguel-de-allende_m%c3%a9xico_3985344?day=4")
+        os.getenv('starturl'))
     print(ini.tag)
