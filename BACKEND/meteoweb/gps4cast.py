@@ -1,13 +1,14 @@
 ########################    Packages    ########################
-
 import pandas as pd
-import gps4cast as fc
+import requests
+from bs4 import BeautifulSoup
+from . import meteoweb as mw
 from dotenv import load_dotenv as env
 import os
 from concurrent.futures import ThreadPoolExecutor
 #--------------------------------------------------------------#
 
-env()  # Get constant values from .env file
+# env()  # Get constant values from .env file
 
 
 ########################    Functions    ########################
@@ -18,6 +19,7 @@ def decorator(function):
         """
         Generate a list with the values fetched from web page
         """
+
         try:
             data = function(url)
             data.predict()
@@ -35,21 +37,47 @@ def decorator(function):
 @decorator
 def normTab(url):
     """
+
     Extract xml format content from 6 firsts days forecast
     within <<tab>> tag
     """
-    data = fc.Daily4cast(url)
+
+    data = mw.Daily4cast(url)
     return data
 
 
 @decorator
 def lastTab(url):
     """
+
     Extract xml format content from last day forecast
     within <<tab>> tag
     """
-    data = fc.Last4cast(url)
+
+    data = mw.Last4cast(url)
     return data
+
+
+########################    Generators    ########################
+
+
+def _genLinks(item):
+    for i in item:
+        links = i.find('a')
+        path = links.get('href')
+        if path and path.startswith('/'):
+            path = os.getenv('mainurl') + path
+        yield path
+
+
+def get_linked_urls(url):
+    req = requests.get(url)
+    soup = BeautifulSoup(req.content, 'html.parser')
+    labels = (label for label in soup.find_all(class_='tab'))
+    links = _genLinks(labels)
+    for link in links:
+        yield link
+#--------------------------------------------------------------#
 
 
 def run(mainurl):
@@ -58,9 +86,10 @@ def run(mainurl):
     daily forecast ordered by date, using multiple-threads with
     threadpool.
     """
+
     recs = []
     with ThreadPoolExecutor(max_workers=3) as exec:
-        for n, url in enumerate(fc.get_linked_urls(mainurl)):
+        for n, url in enumerate(get_linked_urls(mainurl)):
             if n == 6:
                 result = exec.submit(lastTab, url).result()
             else:
@@ -74,4 +103,4 @@ def run(mainurl):
 
 
 if __name__ == '__main__':
-    print(run(os.getenv('startmain')))
+    print(run(os.getenv('starturl')))

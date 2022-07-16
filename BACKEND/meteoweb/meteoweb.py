@@ -2,31 +2,10 @@
 
 import requests
 from bs4 import BeautifulSoup
-import os
 from dotenv import load_dotenv as env
 #--------------------------------------------------------------#
 
-env()  # Get constant values from .env file
-
-########################    Generators    ########################
-
-
-def _genLinks(item):
-    for i in item:
-        links = i.find('a')
-        path = links.get('href')
-        if path and path.startswith('/'):
-            path = os.getenv('mainurl') + path
-        yield path
-
-
-def get_linked_urls(url):
-    req = requests.get(url)
-    soup = BeautifulSoup(req.content, 'html.parser')
-    labels = (label for label in soup.find_all(class_='tab'))
-    links = _genLinks(labels)
-    for link in links:
-        yield link
+# env()  # Get enviroment variables from .env file
 
 
 ########################    Classes    ########################
@@ -51,6 +30,7 @@ class Daily4cast:
         Outcome format is as follows: YYYY-MM-DD
         String type outcome
         """
+
         tag = self.tag.find('time')
         content = tag.get('datetime')
         self.date = content
@@ -63,6 +43,7 @@ class Daily4cast:
         A tuple is the outcome with the next format: (Min, Max)
         Both values are float type
         """
+
         maxTmp = self.tag.find(class_='tab-temp-max').text.strip()[:-3]
         minTmp = self.tag.find(class_='tab-temp-min').text.strip()[:-3]
         self.temp = (int(minTmp), int(maxTmp))
@@ -75,6 +56,7 @@ class Daily4cast:
         Speed is a integer type
         Dir is a string type
         """
+
         patTag = self.tag.find(class_='wind')
         speed = patTag.text.strip()[:-5]
         direction = patTag.span['class'][-1]
@@ -88,6 +70,7 @@ class Daily4cast:
         (pmin, pmax) or (None, None)
         Outcome (None, None) appears when doesn't have rain forecast
         """
+
         values = [l.strip() for l in self.tag.find(
             class_='tab-precip').text.split('-')]
         try:
@@ -101,6 +84,7 @@ class Daily4cast:
         Get sun hours from tag with 'tab-sun' class name
         Output data type is integer
         """
+
         value = self.tag.find(class_='tab-sun').text.strip()[:-2]
         self.sun = int(value)
         return self.sun
@@ -111,6 +95,7 @@ class Daily4cast:
         Grade of previsibility as outcome
         Data type outcome is string
         """
+
         patTag = self.tag.find(class_='tab-predictability')['title']
         level = patTag.split(':')[1].strip().upper()
         self.prev = level
@@ -128,6 +113,7 @@ class Daily4cast:
         self.sun = Sun hours
         self.prev = Grade of previsibility
         """
+
         self.date_fun()
         self.tmp()
         self.wind_fun()
