@@ -73,19 +73,4 @@ def dropPlace(rootpath, cityname):
             newcont.append(place)
     with open(rootpath, 'w') as file:
         json.dump(newcont, file, indent=4)
-
-
-def toFile(path, mainurl, cityname, format='txt'):
-    """
-    Create a file with the daily forecast for a particular place
-    using its url.
-    Outcome file is named with its cityname followed by its creation
-    date and time
-    """
-
-    content = gps4cast.run(mainurl)
-    creation = datetime.now().strftime("%b-%d-%Y_%H-%M")
-    name = cityname + '_' + creation
-    file = path + os.sep + name + '.' + format
-    content.to_csv(file, encoding='utf-8', index=False)
 #--------------------------------------------------------------#
