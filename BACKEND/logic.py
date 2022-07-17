@@ -1,21 +1,19 @@
 ########################    Packages    ########################
 
 import json
-# from dotenv import load_dotenv as env
-from meteoweb import gps4cast
-from datetime import datetime
+from dotenv import load_dotenv as env
 import os
 #--------------------------------------------------------------#
 
-# env()  # Get enviroment variables from .env file
+env()  # Get enviroment variables from .env file
 
 ########################    Classes    ########################
 
 
 class BetterPlace:
 
-    def __init__(self, pathfile, url, cityname):
-        self.path = pathfile
+    def __init__(self, targetpath, url, cityname):
+        self.path = targetpath
         self.url = url
         if cityname:
             self.city = cityname
@@ -31,15 +29,16 @@ class BetterPlace:
 
 ########################    Generator    ########################
 
-def getPlaces(rootpath):
-    with open(rootpath, 'r') as file:
+def getPlaces(root):
+    with open(root, 'r') as file:
         for place in json.load(file):
             yield place
 
 
 ########################    Functions    ########################
 
-def newPlace(rootpath, pathfile, url, cityname=False):
+
+def newPlace(root, targetpath, url, cityname=False):
     """
     Add places of interest into JSON file, of which going to be
     get its forecast, respectively.
@@ -47,30 +46,35 @@ def newPlace(rootpath, pathfile, url, cityname=False):
     for Guanajuato City by default.
     """
 
-    if not os.path.isdir(rootpath):
-        firstobj = BetterPlace(os.getenv('mypath'),
+    if not os.path.isdir(root):
+        firstobj = BetterPlace(os.getenv('testdir'),
                                os.getenv('starturl'), cityname)
-        with open(rootpath, 'w') as nfile:
+        with open(root, 'w') as nfile:
             json.dump([firstobj.__dict__], nfile, indent=4)
 
-    newobj = BetterPlace(pathfile, url, cityname)
-    with open(rootpath, 'r+') as cfile:
+    newobj = BetterPlace(targetpath, url, cityname)
+    with open(root, 'r+') as cfile:
         content = json.load(cfile)
         content.append(newobj.__dict__)
         cfile.seek(0)
         json.dump(content, cfile, indent=4)
 
 
-def dropPlace(rootpath, cityname):
+def dropPlace(root, cityname):
     """
     Drop cityname properties to forecast from the root JSON file
     """
 
-    places = getPlaces(rootpath)
+    places = getPlaces(root)
     newcont = []
     for place in places:
         if place["city"] != cityname:
             newcont.append(place)
-    with open(rootpath, 'w') as file:
+    with open(root, 'w') as file:
         json.dump(newcont, file, indent=4)
 #--------------------------------------------------------------#
+
+
+if __name__ == '__main__':
+    newPlace(url=os.getenv('starturl'), root=os.getenv(
+        'root'), targetpath=os.getenv('testdir'))
