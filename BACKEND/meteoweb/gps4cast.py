@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from . import meteoweb as mw
+# import meteoweb as mw
 # from dotenv import load_dotenv as env
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -75,10 +76,13 @@ def get_linked_urls(url):
     soup = BeautifulSoup(req.content, 'html.parser')
     labels = (label for label in soup.find_all(class_='tab'))
     links = _genLinks(labels)
+    urls = []
     for link in links:
-        yield link
+        urls.append(link)
+    return urls
 #--------------------------------------------------------------#
-
+# import logging
+# logging.basicConfig(level=logging.DEBUG, format='%(threadName)s:%(message)s')
 
 def run(mainurl):
     """
@@ -88,13 +92,14 @@ def run(mainurl):
     """
 
     recs = []
-    with ThreadPoolExecutor(max_workers=3) as exec:
-        for n, url in enumerate(get_linked_urls(mainurl)):
-            if n == 6:
-                result = exec.submit(lastTab, url).result()
-            else:
-                result = exec.submit(normTab, url).result()
-            recs.append(result)
+    urls = get_linked_urls(mainurl)
+    with ThreadPoolExecutor(max_workers=4) as exec:
+        results = exec.map(normTab, urls[:-1])
+        last = exec.submit(lastTab, urls[-1]).result()
+    for result in results:
+        recs.append(result)
+    recs.append(last)
+
     df = pd.DataFrame(data=recs, columns=[
                       "Date", "Tmin(°C)", "Tmax(°C)", "WSpeed(km/h)", "WDirec", "Pmin(mm)", "Pmax(mm)", "Sun(hrs)", "Prev"])
     df.sort_values(by='Date', ascending=True)
