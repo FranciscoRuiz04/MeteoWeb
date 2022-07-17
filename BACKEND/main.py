@@ -5,16 +5,14 @@ import os
 from meteoweb import gps4cast
 from dotenv import load_dotenv as env
 import logic
+from concurrent.futures import ThreadPoolExecutor
 #--------------------------------------------------------------#
-
 env()  # Get enviroment variables
 
-places = logic.getPlaces(os.getenv('root'))  # Get place file properties
-
-########################    Classes    ########################
+########################    Functions    ########################
 
 
-def toFile(path, mainurl, cityname, format='txt'):
+def toFile(folder, mainurl, cityname, format='txt'):
     """
     Create a file with the daily forecast for a particular place
     using its url.
@@ -25,15 +23,26 @@ def toFile(path, mainurl, cityname, format='txt'):
     content = gps4cast.run(mainurl)
     creation = datetime.now().strftime("%b-%d-%Y_%H-%M")
     name = cityname + '_' + creation
-    file = path + os.sep + name + '.' + format
+    file = folder + os.sep + name + '.' + format
+    if not os.path.isdir(folder):
+        os.makedirs(folder)
     content.to_csv(file, encoding='utf-8', index=False)
 
 
-# Generate files with determined properties
-for place in places:
+def fun(place):
     targetPath = place["path"]
     url = place["url"]
     name = place["city"]
-    toFile(path=targetPath, mainurl=url, cityname=name)
+    toFile(targetPath, url, name)
 
-# toFile(os.getenv('testdir'), os.getenv('starturl'), 'Guanajuato')
+
+########################    Exexution    ########################
+try:
+    # Get place properties for every object in JSON file
+    places = logic.getPlaces(os.getenv('root'))
+except:
+    raise FileExistsError("DB file does not exist")
+else:
+    # Generate files with determined properties
+    with ThreadPoolExecutor(max_workers=2) as exec:
+        exec.map(fun, places)
