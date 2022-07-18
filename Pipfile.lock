@@ -340,10 +340,6 @@
             "version": "==0.9.2"
         },
         "urllib3": {
-            "extras": [
-                "secure",
-                "socks"
-            ],
             "hashes": [
                 "sha256:8298d6d56d39be0e3bc13c1c97d133f9b45d797169a0e11cdd0e0489d786f7ec",
                 "sha256:879ba4d1e89654d9769ce13121e0f94310ea32e8d2f8cf587b77c08bbcdb30d6"
