@@ -10,7 +10,7 @@ root.resizable(False, False)
 root.config(bg='#002366')
 root.title('MeteoWeb')
 logo = tk.PhotoImage(file=os.getenv('logopath'))
-root.iconphoto(True,logo)
+root.iconphoto(True, logo)
 
 ######################       New Location    ##########################
 div1 = tk.LabelFrame(root,
@@ -185,9 +185,10 @@ div6.pack(fill='both', padx=10, expand=True)
 mycanvas = tk.Canvas(div6, bg='#003153', relief='flat')
 mycanvas.pack(side=LEFT, fill='both', expand=True)
 
-style=ttk.Style()
+style = ttk.Style()
 style.theme_use("default")
-style.configure("Vertical.TScrollbar", background="#002366", arrowcolor="#F1C40F")
+style.configure("Vertical.TScrollbar",
+                background="#002366", arrowcolor="#F1C40F")
 
 
 yscroll = ttk.Scrollbar(div6, orient='vertical', command=mycanvas.yview)
@@ -199,30 +200,48 @@ mycanvas.bind('<Configure>', lambda e: mycanvas.configure(
 
 myframe = tk.Frame(mycanvas, bg='#003153', relief='flat')
 mycanvas.create_window((0, 0), window=myframe, anchor='nw')
-# myframe.pack()
-
 
 for n, val in enumerate(commands.brief(), 2):
-    citykey = tk.Label(myframe,
-                       text=val[0] + '   :',
-                       font=('Arial', 11, 'bold'),
-                       bg='#003153',
-                       foreground='white',
-                       padx=30,
-                       relief='sunken',
-                       height=2)
-    citykey.grid(row=n, column=0, sticky='ew')
+    data1 = tk.StringVar()
+    data1.set(val[0])
+    webent = tk.Entry(myframe,
+                      textvariable=data1,
+                      font=('Arial', 11, 'bold'),
+                      bg='#003153',
+                      foreground='white',
+                      width=25)
+    webent.grid(row=n, column=0, sticky='ew', pady=5)
+    
+    data2 = tk.StringVar()
+    data2.set(val[1])
+    webent2 = tk.Entry(myframe,
+                      textvariable=data2,
+                      font=('Arial', 11, 'bold'),
+                      bg='#003153',
+                      foreground='white',
+                      width=74)
+    webent2.grid(row=n, column=1, sticky='ew')
+    
+    # citykey = tk.Label(myframe,
+    #                    text=val[0] + '   :',
+    #                    font=('Arial', 11, 'bold'),
+    #                    bg='#003153',
+    #                    foreground='white',
+    #                    padx=30,
+    #                    relief='sunken',
+    #                    height=2)
+    # citykey.grid(row=n, column=0, sticky='ew')
 
-    pathkey = tk.Label(myframe,
-                       text=val[1],
-                       font=('Arial', 11),
-                       bg='#003153',
-                       foreground='white',
-                       padx=90,
-                       relief='sunken',
-                       height=2,
-                       width=45)
-    pathkey.grid(row=n, column=1, sticky='ew')
+    # pathkey = tk.Label(myframe,
+    #                    text=val[1],
+    #                    font=('Arial', 11),
+    #                    bg='#003153',
+    #                    foreground='white',
+    #                    padx=90,
+    #                    relief='sunken',
+    #                    height=2,
+    #                    width=45)
+    # pathkey.grid(row=n, column=1, sticky='ew')
 
 
 ######################       Separator    ##########################
