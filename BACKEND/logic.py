@@ -57,11 +57,12 @@ def newPlace(root, targetpath, url, cityname):
     with open(root, 'r+') as cfile:
         content = json.load(cfile)
         for obj in content:
-            if cityname == obj["city"]:
-                return False
+            if newobj.city == obj["city"]:
+                return (False, newobj.city)
         content.append(newobj.__dict__)
         cfile.seek(0)
         json.dump(content, cfile, indent=4)
+        return (True, newobj.city)
 
 
 def dropPlace(root, cityname):

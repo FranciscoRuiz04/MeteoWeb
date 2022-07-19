@@ -25,18 +25,18 @@ def dropCommand(inp):
 def addCommand(inurl, folder, name):
     if inurl != '' and folder != '':
         if name == '':
-            name = False
+            city = False
         else:
-            cityname = name.lower().replace(' ', '-')
+            city = name.lower().replace(' ', '-')
         try:
-            cond = logic.newPlace(root=os.getenv('root'), url=inurl,
-                                  targetpath=folder, cityname=cityname)
-            if cond == None:
+            cityname = logic.newPlace(root=os.getenv('root'), url=inurl,
+                                  targetpath=folder, cityname=city)
+            if cityname[0]:
                 ms.showinfo(title="New city added",
-                            message=f"{name} HAS ADDED AS {cityname}!")
+                            message=f"{name} HAS ADDED AS {cityname[1]}!")
             else:
                 ms.showinfo(title="City Duplicity",
-                            message=f"{name} already exists")
+                            message=f"{cityname[1]} already exists")
         except:
             ms.showerror(title="Error", message="Has occured an error")
     else:
@@ -47,3 +47,6 @@ def brief():
     for i in logic.getPlaces(os.getenv('root')):
         url = i["url"].split('.com')[-1]
         yield [i["city"], i["path"], url]
+
+if __name__=='__main__':
+    addCommand("https://www.meteoblue.com/es/tiempo/semana/guadalajara_m%c3%a9xico_4005539", "C:\DailyForecast_test", '')
