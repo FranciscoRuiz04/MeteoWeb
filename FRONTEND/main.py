@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import LEFT, RIGHT, ttk
-import commands
+from FRONTEND import commands
+import os
 
 # Root window
 root = tk.Tk()
@@ -8,7 +9,8 @@ root.geometry('850x600')
 root.resizable(False, False)
 root.config(bg='#002366')
 root.title('MeteoWeb')
-
+logo = tk.PhotoImage(file=os.getenv('logopath'))
+root.iconphoto(True,logo)
 
 ######################       New Location    ##########################
 div1 = tk.LabelFrame(root,
