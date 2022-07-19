@@ -43,6 +43,9 @@ try:
 except:
     raise FileExistsError("DB file does not exist")
 else:
-    # Generate files with determined properties
-    with ThreadPoolExecutor(max_workers=2) as exec:
-        exec.map(fun, places)
+    try:
+        # Generate files with determined properties
+        with ThreadPoolExecutor(max_workers=2) as exec:
+            exec.map(fun, places)
+    except:
+        raise ValueError("Some value is wrong")
