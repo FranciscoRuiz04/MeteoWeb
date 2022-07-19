@@ -3,11 +3,11 @@
 from datetime import datetime
 import os
 from meteoweb import gps4cast
-from dotenv import load_dotenv as env
+# from dotenv import load_dotenv as env
 import logic
 from concurrent.futures import ThreadPoolExecutor
 #--------------------------------------------------------------#
-env()  # Get enviroment variables
+# env()  # Get enviroment variables
 
 ########################    Functions    ########################
 
