@@ -2,7 +2,7 @@ import sys
 import os
 from tkinter import messagebox as ms
 from dotenv import load_dotenv as env
-sys.path[0] = sys.path[0][:-9]
+sys.path[0] = sys.path[0][:-8]
 from BACKEND import logic
 
 env()
