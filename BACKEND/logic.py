@@ -4,7 +4,6 @@ import json
 from dotenv import load_dotenv as env
 import os
 
-from numpy import integer
 #--------------------------------------------------------------#
 
 env()  # Get enviroment variables from .env file
