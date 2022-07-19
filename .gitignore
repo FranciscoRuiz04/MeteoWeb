@@ -1,3 +1,5 @@
 .env
 __pycache__/
 db.json
+MeteoWeb.exe
+MeteoWeb.lnk
