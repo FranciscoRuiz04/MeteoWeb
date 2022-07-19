@@ -3,9 +3,12 @@
 import json
 from dotenv import load_dotenv as env
 import os
+
+from numpy import integer
 #--------------------------------------------------------------#
 
 env()  # Get enviroment variables from .env file
+
 
 ########################    Classes    ########################
 
@@ -38,7 +41,7 @@ def getPlaces(root):
 ########################    Functions    ########################
 
 
-def newPlace(root, targetpath, url, cityname=False):
+def newPlace(root, targetpath, url, cityname):
     """
     Add places of interest into JSON file, of which going to be
     get its forecast, respectively.
@@ -46,15 +49,17 @@ def newPlace(root, targetpath, url, cityname=False):
     for Guanajuato City by default.
     """
 
-    if not os.path.isdir(root):
-        firstobj = BetterPlace(os.getenv('testdir'),
-                               os.getenv('starturl'), cityname)
-        with open(root, 'w') as nfile:
-            json.dump([firstobj.__dict__], nfile, indent=4)
+    if not os.path.exists(root):
+        file = open(root, 'w')
+        json.dump([], file, indent=4)
+        file.close()
 
     newobj = BetterPlace(targetpath, url, cityname)
     with open(root, 'r+') as cfile:
         content = json.load(cfile)
+        for obj in content:
+            if cityname == obj["city"]:
+                return False
         content.append(newobj.__dict__)
         cfile.seek(0)
         json.dump(content, cfile, indent=4)
@@ -67,14 +72,19 @@ def dropPlace(root, cityname):
 
     places = getPlaces(root)
     newcont = []
+    n = 0
     for place in places:
         if place["city"] != cityname:
             newcont.append(place)
-    with open(root, 'w') as file:
-        json.dump(newcont, file, indent=4)
+        else:
+            n += 1
+    if n:
+        with open(root, 'w') as file:
+            json.dump(newcont, file, indent=4)
+    return n
 #--------------------------------------------------------------#
 
 
 if __name__ == '__main__':
     newPlace(url=os.getenv('starturl'), root=os.getenv(
-        'root'), targetpath=os.getenv('testdir'))
+        'root'), targetpath=os.getenv('testdir'), cityname='sma')
