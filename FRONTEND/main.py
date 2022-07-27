@@ -7,10 +7,13 @@ __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
 
+########################    Packages    ########################
 import tkinter as tk
 from tkinter import LEFT, RIGHT, ttk
-from FRONTEND import commands
 import os
+#-----------------------    GPS Pckgs    ----------------------#
+from FRONTEND import commands
+#--------------------------------------------------------------#
 
 # Root window
 root = tk.Tk()

@@ -7,12 +7,15 @@ __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
 
+########################    Packages    ########################
 import sys
 import os
 from tkinter import messagebox as ms
 from dotenv import load_dotenv as env
 sys.path[0] = sys.path[0][:-8]
+#-----------------------    GPS Pckgs    ----------------------#
 from BACKEND import logic
+#--------------------------------------------------------------#
 
 env()
 
