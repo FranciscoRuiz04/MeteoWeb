@@ -1,3 +1,13 @@
+__author__ = "Ulises Francisco Ruiz Gomez"
+__copyright__ = "Copyright 2022, GPS"
+__credits__ = "GPS"
+
+__version__ = "1.0.1"
+__maintainer__ = "Francisco Ruiz"
+__email__ = "franciscoruiz078@gmail.com"
+__status__ = "Developer"
+
+
 ########################    Packages    ########################
 
 from datetime import datetime
@@ -37,15 +47,22 @@ def fun(place):
 
 
 ########################    Exexution    ########################
-try:
-    # Get place properties for every object in JSON file
-    places = logic.getPlaces(os.getenv('root'))
-except:
-    raise FileExistsError("DB file does not exist")
-else:
+def exec():
     try:
-        # Generate files with determined properties
-        with ThreadPoolExecutor(max_workers=2) as exec:
-            exec.map(fun, places)
+        # Get place properties for every object in JSON file
+        places = logic.getPlaces(os.getenv('root'))
     except:
-        raise ValueError("Some value is wrong")
+        raise FileExistsError("DB file does not exist")
+    else:
+        try:
+            # Generate files with determined properties
+            with ThreadPoolExecutor(max_workers=2) as exec:
+                exec.map(fun, places)
+        except:
+            raise ValueError("Some value is wrong")
+
+from apscheduler.schedulers.blocking import BlockingScheduler
+
+scheduler = BlockingScheduler()
+scheduler.add_job(exec, 'interval', hours=1)
+scheduler.start()
