@@ -93,8 +93,10 @@ class Daily4cast:
         for n,value in enumerate(values):
             if value == '':
                 values[n] = None
-            else:
+            elif n:
                 values[n] = int(values[n][:-3])
+            else:
+                values[n] = int(values[n])
         self.precip = tuple(values)
  
         return self.precip
@@ -152,5 +154,5 @@ if __name__ == '__main__':
     # ini = Daily4cast(
     #     os.getenv('starturl'), 'tab active last')
     # print(ini.tag)
-    ini = Daily4cast(r'https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=3')
+    ini = Daily4cast(r'https://www.meteoblue.com/es/tiempo/semana/san-miguel-de-allende_m%c3%a9xico_3985344')
     print(ini.precip_fun())

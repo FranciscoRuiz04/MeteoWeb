@@ -35,8 +35,8 @@ def exec():
                 exec.map(index.fun, places)
         except:
             raise ValueError("Some value is wrong")
-    finally:
-        print('Algorithm runned')
+    # finally:
+    #     print('Algorithm runned')
         
 exec()
 ########################    Schedule    ########################
