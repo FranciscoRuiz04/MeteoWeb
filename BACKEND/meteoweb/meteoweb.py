@@ -79,13 +79,24 @@ class Daily4cast:
         (pmin, pmax) or (None, None)
         Outcome (None, None) appears when doesn't have rain forecast
         """
+        val = self.tag.find(class_='tab-precip').text
+        
+        if '<' in val:
+            separator = '<'
+        elif '>' in val:
+            separator = '>'
+        else:
+            separator = '-'
+            
+        values = list(map(lambda x: x.strip(), val.split(separator)))
 
-        values = [l.strip() for l in self.tag.find(
-            class_='tab-precip').text.split('-')]
-        try:
-            self.precip = (int(values[0]), int(values[1][:-3]))
-        except:
-            self.precip = (None, None)
+        for n,value in enumerate(values):
+            if value == '':
+                values[n] = None
+            else:
+                values[n] = int(values[n][:-3])
+        self.precip = tuple(values)
+ 
         return self.precip
 
     def sunhrs(self):
@@ -141,6 +152,5 @@ if __name__ == '__main__':
     # ini = Daily4cast(
     #     os.getenv('starturl'), 'tab active last')
     # print(ini.tag)
-    ini = Last4cast(
-        os.getenv('starturl'))
-    print(ini.tag)
+    ini = Daily4cast(r'https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=3')
+    print(ini.precip_fun())
