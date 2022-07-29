@@ -79,24 +79,26 @@ class Daily4cast:
         (pmin, pmax) or (None, None)
         Outcome (None, None) appears when doesn't have rain forecast
         """
+        
         val = self.tag.find(class_='tab-precip').text
         
-        if '<' in val:
-            separator = '<'
-        elif '>' in val:
-            separator = '>'
-        else:
-            separator = '-'
-            
-        values = list(map(lambda x: x.strip(), val.split(separator)))
-
+        separators = ['<', '>', '-']
+        for separator in separators:
+            if separator in val:
+                if separator == '-' or separator == '<':
+                    values = val.split(separator)
+                else:
+                    values = reversed(val.split(separator))
+                break
+        
+        values = list(map(lambda x: x.strip(), values))
+        
         for n,value in enumerate(values):
             if value == '':
                 values[n] = None
-            elif n:
-                values[n] = int(values[n][:-3])
             else:
-                values[n] = int(values[n])
+                values[n] = int(values[n].replace('mm', ''))
+        
         self.precip = tuple(values)
  
         return self.precip
@@ -154,5 +156,5 @@ if __name__ == '__main__':
     # ini = Daily4cast(
     #     os.getenv('starturl'), 'tab active last')
     # print(ini.tag)
-    ini = Daily4cast(r'https://www.meteoblue.com/es/tiempo/semana/san-miguel-de-allende_m%c3%a9xico_3985344')
+    ini = Daily4cast(r'https://www.meteoblue.com/es/tiempo/semana/san-miguel-de-allende_m%c3%a9xico_3985344?day=2')
     print(ini.precip_fun())
