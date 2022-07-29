@@ -40,6 +40,6 @@ def exec():
         
 exec()
 ########################    Schedule    ########################
-scheduler = BlockingScheduler()
-scheduler.add_job(exec, 'interval', hours=1)
-scheduler.start()
+# scheduler = BlockingScheduler()
+# scheduler.add_job(exec, 'interval', hours=1)
+# scheduler.start()
