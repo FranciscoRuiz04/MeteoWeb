@@ -8,129 +8,104 @@ __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
 
 ########################    Packages    ########################
-from doctest import master
 import tkinter as tk
 from tkinter import LEFT, RIGHT, ttk
 import os
+
 #-----------------------    GPS Pckgs    ----------------------#
 # from FRONTEND import commands
 import commands
+try:
+    import widgets as wdg
+except ModuleNotFoundError:
+    import sys
+    sys.path.append(r'C:\CODES\MeteoWeb\FRONTEND')
+    import widgets as wdg
 #--------------------------------------------------------------#
 
 # Root window
 root = tk.Tk()
-root.geometry('750x600')
+root.geometry('760x600')
 root.resizable(False, False)
 root.config(bg='#818284')
 root.title('MeteoWeb')
 logo = tk.PhotoImage(file=os.getenv('logopath'))
 root.iconphoto(True, logo)
 
+
 ######################       New Location    ##########################
-
-
-class LabelFrame(tk.LabelFrame):
-    def __init__(self, height=0, bg='#134351'):
-        tk.LabelFrame.__init__(
-            self, master=root, bg=bg, relief='flat', height=height)
-
-
-class SectionName(tk.Label):
-    def __init__(self, div, text):
-        tk.Label.__init__(self, master=div, text=text, font=(
-            'Arial', 9, 'bold'), bg='#134351', fg='#FFBD08')
-
-
-class EntryName(tk.Label):
-    def __init__(self, div, text, relief=None, height=None, width=None):
-        tk.Label.__init__(self, master=div, text=text, font=(
-            'Arial', 10, 'bold'), bg='#134351', fg='#dcdcdc', padx=10, relief=relief, height=height, width=width)
-
-
-class Entry(tk.Entry):
-    def __init__(self, div):
-        tk.Entry.__init__(self, master=div, width=75, font=(
-            'Arial', 10), borderwidth=3, exportselection=True, justify='center', bg='#dcdcdc', fg='black')
-
-
-class Button(tk.Button):
-    def __init__(self, div, text, functionality):
-        tk.Button.__init__(self, master=div, text=text, font=('Arial', 11, 'bold'), border=3,
-                           relief='ridge', bg='#134351', fg='#FFBD07', width=8, command=functionality)
-
-
-
-
-
-div1 = LabelFrame()
+div1 = wdg.LabelFrame(root)
 div1.pack(fill='x', padx=10, pady=10)
 
-header1 = SectionName(div1, 'Nueva Locación')
+header1 = wdg.SectionName(div1, 'Nueva Locación')
 header1.grid(row=0, column=0, padx=10, pady=3)
 
 # URL
-urlLab = EntryName(div1, 'URL')
+urlLab = wdg.EntryName(div1, 'URL')
 urlLab.grid(row=1, column=0, pady=7)
 
-ent = Entry(div1)
+ent = wdg.Entry(div1)
 ent.grid(row=1, column=1, sticky='w')
 
 # Target Path
-targetLab = EntryName(div1, 'Carpeta')
+targetLab = wdg.EntryName(div1, 'Carpeta')
 targetLab.grid(row=2, column=0, pady=7)
 
-ent2 = Entry(div1)
+p = tk.StringVar()
+ent2 = wdg.Entry(div1, text=p)
 ent2.grid(row=2, column=1, sticky='w')
 
+bsearch = wdg.SearchBtm(div1, 'Buscar', p)
+bsearch.grid(row=2, column=2, padx=10)
 # Cityname
-cityLab = EntryName(div1, 'Nombre')
+cityLab = wdg.EntryName(div1, 'Nombre')
 cityLab.grid(row=3, column=0, pady=7)
 
-ent3 = Entry(div1)
+ent3 = wdg.Entry(div1)
 ent3.grid(row=3, column=1)
 
 # Add bottom
-btn1 = Button(div1, 'Añadir', lambda: commands.addCommand(
+btn1 = wdg.Button(div1, 'Añadir', lambda: commands.addCommand(
     ent.get(), ent2.get(), ent3.get()))
 btn1.grid(row=4, column=1, pady=10)
 
 
 ######################       Separator    ##########################
-div2 = LabelFrame(3)
+div2 = wdg.LabelFrame(root, 3)
 div2.pack(padx=6, fill='x')
 
 
 ######################       Drop Location    ##########################
-div3 = LabelFrame()
+div3 = wdg.LabelFrame(root)
 div3.pack(fill='x', padx=10, pady=10)
 
-header2 = SectionName(div3, 'Borrar Locación')
+header2 = wdg.SectionName(div3, 'Borrar Locación')
 header2.grid(row=0, column=0, padx=10, pady=3)
 
 # Cityname
-namLab = EntryName(div3, 'Nombre')
+namLab = wdg.EntryName(div3, 'Nombre')
 namLab.grid(row=1, column=0, pady=7)
 
-ent4 = Entry(div3)
+ent4 = wdg.Entry(div3)
 ent4.grid(row=1, column=1)
 
-btn2 = Button(div3, 'Borrar', lambda: commands.dropCommand(ent4.get()))
+btn2 = wdg.Button(div3, 'Borrar', lambda: commands.dropCommand(ent4.get()))
 btn2.grid(row=4, column=1, pady=10)
 
 
 ######################       Separator    ##########################
 
-div4 = LabelFrame(3)
+div4 = wdg.LabelFrame(root, 3)
 div4.pack(padx=6, fill='x')
 
-div7 = LabelFrame(bg='#858784', height=10)
+div7 = wdg.LabelFrame(root, bg='#858784', height=10)
 div7.pack(padx=6, fill='x')
 
 
 ######################       Content Brief    ##########################
 ######################          Header        ##########################
 
-div5 = LabelFrame()
+div5 = wdg.LabelFrame(root)
 div5.pack(fill='x', padx=10)
 
 header3 = tk.Label(div5,
@@ -205,7 +180,7 @@ for n, val in enumerate(commands.brief(), 2):
 
 
 ######################       Separator    ##########################
-# div8 = tk.LabelFrame(root, bg='#002366', height=20, relief='flat')
+# div8 = tk.wdg.LabelFrame(root, bg='#002366', height=20, relief='flat')
 # div8.pack(padx=6, fill='x')
 
 
