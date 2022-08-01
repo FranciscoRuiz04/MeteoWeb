@@ -1,9 +1,26 @@
 import tkinter as tk
-# import sys
-# sys.path[0] = sys.path[0][:-9]
+from tkinter import filedialog
+
+
+
+def browseFiles(var):
+    filename = filedialog.askopenfilename(initialdir="/",
+                                          title="Select a File",
+                                          filetypes=(("Text Files",
+                                                      "*.csv;*.txt"),))
+
+    # Change label contents
+    var.set(filename)
+
+def browseDir(var):
+    path = filedialog.askdirectory(initialdir="/",
+                                          title="Select a File")
+    var.set(path)
+
+
 
 class LabelFrame(tk.LabelFrame):
-    def __init__(self, root, height=0, bg='#134351'):
+    def __init__(self, root, height=None, bg='#134351'):
         tk.LabelFrame.__init__(
             self, master=root, bg=bg, relief='flat', height=height)
 
@@ -21,12 +38,21 @@ class EntryName(tk.Label):
 
 
 class Entry(tk.Entry):
-    def __init__(self, div):
-        tk.Entry.__init__(self, master=div, width=75, font=(
-            'Arial', 10), borderwidth=3, exportselection=True, justify='center', bg='#dcdcdc', fg='black')
+    def __init__(self, div, wd=75, text=None):
+        tk.Entry.__init__(self, master=div, width=wd, font=(
+            'Arial', 10), borderwidth=3, exportselection=True, justify='center', bg='#dcdcdc', fg='black', textvariable=text)
 
 
 class Button(tk.Button):
-    def __init__(self, div, text, functionality):
-        tk.Button.__init__(self, master=div, text=text, font=('Arial', 11, 'bold'), border=3,
+    def __init__(self, div, text, functionality, htxt=11):
+        tk.Button.__init__(self, master=div, text=text, font=('Arial', htxt, 'bold'), border=3,
                            relief='ridge', bg='#134351', fg='#FFBD07', width=8, command=functionality)
+
+
+class SearchBtm(Button):
+    def __init__(self, div, text, variable, forfile=False):
+        if forfile:
+            function = lambda: browseFiles(variable)
+        else:
+            function = lambda: browseDir(variable)
+        Button.__init__(self, div, text, function, htxt=9)
