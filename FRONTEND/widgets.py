@@ -25,11 +25,11 @@ def checkBx(curval, *others):
 
 
 class CB(tk.Checkbutton):
-    def __init__(self, div, text, functionality, variable=None):
+    def __init__(self, div, text, functionality=None, variable=None):
         tk.Checkbutton.__init__(self, div, text=text, variable=variable, onvalue=1,
                                 offvalue=0, command=functionality, background='#134351',
                                 font=('Arial', 10, 'bold'), activebackground='#134351', fg='#dcdcdc',
-                                height=2, selectcolor='#818284', wraplength=100)
+                                height=2, selectcolor='#818284')
 
 
 class LabelFrame(tk.LabelFrame):
@@ -45,9 +45,9 @@ class SectionName(tk.Label):
 
 
 class EntryName(tk.Label):
-    def __init__(self, div, text, relief=None, height=None, width=None):
+    def __init__(self, div, text, relief=None, height=None, width=None, anchor=None):
         tk.Label.__init__(self, master=div, text=text, font=(
-            'Arial', 10, 'bold'), bg='#134351', fg='#dcdcdc', padx=10, relief=relief, height=height, width=width)
+            'Arial', 10, 'bold'), bg='#134351', fg='#dcdcdc', padx=10, relief=relief, height=height, width=width, anchor=anchor,)
 
 
 class Entry(tk.Entry):
@@ -61,7 +61,7 @@ class Entry(tk.Entry):
 
 
 class Button(tk.Button):
-    def __init__(self, div, text, functionality, htxt=11):
+    def __init__(self, div, text, functionality=None, htxt=11):
         tk.Button.__init__(self, master=div, text=text, font=('Arial', htxt, 'bold'), border=3,
                            relief='ridge', bg='#134351', fg='#FFBD07', width=8, command=functionality)
 
