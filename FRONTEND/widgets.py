@@ -2,8 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 
-
-def browseFiles(var):
+def _browseFiles(var):
     filename = filedialog.askopenfilename(initialdir="/",
                                           title="Select a File",
                                           filetypes=(("Text Files",
@@ -12,11 +11,25 @@ def browseFiles(var):
     # Change label contents
     var.set(filename)
 
-def browseDir(var):
+
+def _browseDir(var):
     path = filedialog.askdirectory(initialdir="/",
-                                          title="Select a File")
+                                   title="Select a File")
     var.set(path)
 
+
+def checkBx(curval, *others):
+    if curval:
+        for val in others:
+            val.deselect()
+
+
+class CB(tk.Checkbutton):
+    def __init__(self, div, text, functionality, variable=None):
+        tk.Checkbutton.__init__(self, div, text=text, variable=variable, onvalue=1,
+                                offvalue=0, command=functionality, background='#134351',
+                                font=('Arial', 10, 'bold'), activebackground='#134351', fg='#dcdcdc',
+                                height=2, selectcolor='#818284', wraplength=100)
 
 
 class LabelFrame(tk.LabelFrame):
@@ -38,9 +51,13 @@ class EntryName(tk.Label):
 
 
 class Entry(tk.Entry):
-    def __init__(self, div, wd=75, text=None):
-        tk.Entry.__init__(self, master=div, width=wd, font=(
-            'Arial', 10), borderwidth=3, exportselection=True, justify='center', bg='#dcdcdc', fg='black', textvariable=text)
+    def __init__(self, div, wd=75, text=None, isbold=False):
+        if isbold:
+            font = ('Arial', 10, 'bold')
+        else:
+            font = ('Arial', 10)
+        tk.Entry.__init__(self, master=div, width=wd, font=font, borderwidth=3,
+                          exportselection=True, justify='center', bg='#dcdcdc', fg='black', textvariable=text)
 
 
 class Button(tk.Button):
@@ -52,7 +69,7 @@ class Button(tk.Button):
 class SearchBtm(Button):
     def __init__(self, div, text, variable, forfile=False):
         if forfile:
-            function = lambda: browseFiles(variable)
+            def function(): return _browseFiles(variable)
         else:
-            function = lambda: browseDir(variable)
+            def function(): return _browseDir(variable)
         Button.__init__(self, div, text, function, htxt=9)
