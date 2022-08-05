@@ -20,6 +20,41 @@ from BACKEND import logic
 env()
 
 
+def _getSep(inpSep=None, sep=None):
+    # inpSep = [coma, tab, other]
+    outSep = [',', '\t', sep]
+    for b in zip(inpSep, outSep):
+        if b[0]:
+            return b[1]
+
+
+def masiveAddCommand(pathfile, targetpath, inpSep, sep, encod, headers, numfields):
+    if pathfile != '' and targetpath != '':
+        try:
+            numeration = list(map(int, numfields))
+        except:
+            numeration = None
+        
+        try:
+            records = logic.attsFromFile(pathfile, _getSep(inpSep,sep), headers, numeration, encod)
+        except:
+            ms.showerror(message="Wrong value")
+        else:
+            records = logic.attsFromFile(pathfile, _getSep(inpSep,sep), headers, numeration, encod)
+            n, y = 0, 0
+            for record in records:
+                city = record['name'].lower().replace(' ', '-')
+                folder = targetpath.replace('/', os.sep) + os.sep + record['name']
+                if logic.newPlace(root=os.getenv('root'), url=record['url'], targetpath=folder, cityname=city)[0]:
+                    y += 1
+                else:
+                    n += 1
+            ms.showinfo(message='Tarea Completada:\n\n{} registro(s) nuevo(s)\n{} registro(s) omitido(s) por duplicidad'.format(y,n))
+    
+    else:
+        ms.showwarning(title="Field Empty", message="Input or Output field is not complete")
+
+
 def dropCommand(inp):
     if inp != '':
         entry = inp.lower()
@@ -42,7 +77,7 @@ def addCommand(inurl, folder, name):
             city = name.lower().replace(' ', '-')
         try:
             cityname = logic.newPlace(root=os.getenv('root'), url=inurl,
-                                  targetpath=folder, cityname=city)
+                                  targetpath=folder.replace('/', os.sep), cityname=city)
             if cityname[0]:
                 ms.showinfo(title="New city added",
                             message=f"{name} HAS ADDED AS {cityname[1]}!")
@@ -61,4 +96,5 @@ def brief():
         yield [i["city"], i["path"], url]
 
 if __name__=='__main__':
-    addCommand("https://www.meteoblue.com/es/tiempo/semana/guadalajara_m%c3%a9xico_4005539", "C:\DailyForecast_test", '')
+    # addCommand("https://www.meteoblue.com/es/tiempo/semana/guadalajara_m%c3%a9xico_4005539", "C:\DailyForecast_test", '')
+    print(masiveAddCommand(os.getenv('filetest'), os.getenv('absdir'), [0,1,0], None, '', False, [1,2]))
