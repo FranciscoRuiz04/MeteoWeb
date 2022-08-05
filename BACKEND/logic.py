@@ -93,10 +93,10 @@ def dropPlace(root, cityname):
     return n
 
 
-def attsFromFile(pathfile, sep=None, headers=False, iloc=[1, 2], encod='utf-8'):
+def attsFromFile(pathfile, sep, headers, cloc=None, encod=None):
     """
-    Get a dictionary type object with the attributes from a csv file for every
-    new record to be added into cities forecasted database.
+    Generator to get a dictionary type object with the attributes from a csv
+    file for every new record to be added into cities forecasted database.
     CSV file must have 2 columns at least: one with the url and another one
     with the save targetpath where will be saved the data scrapped from the
     web.
@@ -108,7 +108,7 @@ def attsFromFile(pathfile, sep=None, headers=False, iloc=[1, 2], encod='utf-8'):
 
     <<headers>> indicates if the file have headers. By default is False.
 
-    <<iloc>> is a list type object with the column number where is every
+    <<cloc>> is a list type object with the column number where is every
     corresponding attribute. The order of indexes corresponds as follow:
     [url, folder, name]. By default takes the order [1, 2].
     For example:
@@ -120,23 +120,26 @@ def attsFromFile(pathfile, sep=None, headers=False, iloc=[1, 2], encod='utf-8'):
     """
 
     attributes = {}
-    
+    if encod == '' or encod is None:
+        encod = 'utf-8'
+    if cloc is None:
+        cloc = [1,2]
     with open(pathfile, 'r', encoding=encod) as file:
         lines = (line.split(sep) for line in file)
         if headers:
             next(lines)
         for line in lines:
             atts = [att.strip("\n\ufeff") for att in line]
-            
-            attributes['url'] = atts[iloc[0]-1]
-            attributes['name'] = atts[iloc[1]-1]
-            yield attributes
+            if 'http' not in atts[cloc[0]-1]:
+                pass
+            else:
+                attributes['url'] = atts[cloc[0]-1]
+                attributes['name'] = atts[cloc[1]-1]
+                yield attributes
 
 #--------------------------------------------------------------#
 
 
 if __name__ == '__main__':
-    # newPlace(url=os.getenv('starturl'), root=os.getenv(
-    #     'root'), targetpath=os.getenv('testdir'), cityname='sma')
-    pipline = ((att['url'], att['name']) for att in attsFromFile('c:/usersfrancisco ruiz/desktop/example.csv',','))
-    print(next(pipline))
+    newPlace(url=os.getenv('starturl'), root=os.getenv(
+        'root'), targetpath=os.getenv('testdir'), cityname='sma')
