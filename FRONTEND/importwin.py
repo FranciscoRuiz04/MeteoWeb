@@ -10,6 +10,8 @@ __status__ = "Developer"
 import tkinter as tk
 import widgets as wdg
 
+import commands
+
 root = tk.Tk()
 root.geometry('550x520')
 root.resizable(False, False)
@@ -27,21 +29,21 @@ h1.grid(row=0, column=0, padx=10, pady=3)
 l1 = wdg.EntryName(div1, 'Entrada')
 l1.grid(row=1, column=0, pady=7)
 
-var1 = tk.StringVar()
-i1 = wdg.Entry(div1, 50, var1)
+pathfile = tk.StringVar()
+i1 = wdg.Entry(div1, 50, pathfile)
 i1.grid(row=1, column=1, sticky='w')
 
-b1 = wdg.SearchBtm(div1, 'Buscar', var1, True)
+b1 = wdg.SearchBtm(div1, 'Buscar', pathfile, True)
 b1.grid(row=1, column=2, padx=10)
 
 l2 = wdg.EntryName(div1, 'Salida')
 l2.grid(row=2, column=0, pady=7)
 
-var2 = tk.StringVar()
-i2 = wdg.Entry(div1, 50, var2)
+targetpath = tk.StringVar()
+i2 = wdg.Entry(div1, 50, targetpath)
 i2.grid(row=2, column=1, sticky='w')
 
-b2 = wdg.SearchBtm(div1, 'Buscar', var2)
+b2 = wdg.SearchBtm(div1, 'Buscar', targetpath)
 b2.grid(row=2, column=2, padx=10)
 
 
@@ -60,24 +62,24 @@ h2.grid(row=0, column=0, padx=10, pady=3)
 h3 = wdg.EntryName(div4, 'Separador de Campos')
 h3.grid(row=1, column=0, pady=5, columnspan=4, sticky='e')
 
-#-------------------------   Checkbox   ---------------------------
+# -------------------------   Checkbox   ---------------------------
 # Define empty variables
-vc1 = tk.IntVar()
-vc2 = tk.IntVar()
-vc3 = tk.IntVar()
+iscoma = tk.IntVar()
+istab = tk.IntVar()
+isother = tk.IntVar()
 
-#Comas
-c1 = wdg.CB(div4, 'Coma', lambda:wdg.checkBx(vc1, c2, c3), vc1)
+# Comas
+c1 = wdg.CB(div4, 'Coma', lambda: wdg.checkBx(iscoma, c2, c3), iscoma)
 c1.grid(row=2, column=0, padx=40)
 
-#Tab
-c2 = wdg.CB(div4, 'Tabulación', lambda:wdg.checkBx(vc2, c1, c3), vc2)
+# Tab
+c2 = wdg.CB(div4, 'Tabulación', lambda: wdg.checkBx(istab, c1, c3), istab)
 c2.grid(row=2, column=1, padx=40)
 
-#Other
-c3 = wdg.CB(div4, 'Otro:', lambda: wdg.checkBx(vc3, c1, c2), vc3)
+# Other
+c3 = wdg.CB(div4, 'Otro:', lambda: wdg.checkBx(isother, c1, c2), isother)
 c3.grid(row=2, column=2, padx=30)
-#Separator Value
+# Separator Value
 separator = wdg.Entry(div4, 3, isbold=True)
 separator.grid(row=2, column=3)
 
@@ -87,7 +89,6 @@ div5 = wdg.LabelFrame(root, 3)
 div5.pack(fill='x', padx=10)
 div6 = wdg.LabelFrame(root)
 div6.pack(fill='x', padx=10, pady=10)
-
 
 
 h4 = wdg.SectionName(div6, 'Información Adicional')
@@ -119,13 +120,17 @@ l5.grid(row=5, column=0, sticky='e')
 encodValue = wdg.Entry(div6, 8)
 encodValue.grid(row=5, column=1, sticky='w')
 
-ishead = wdg.CB(div6, 'Encabezados')
-ishead.grid(row=5, column=2, columnspan=2)
+ishead = tk.IntVar()
+cishead = wdg.CB(div6, 'Encabezados', variable=ishead)
+cishead.grid(row=5, column=2, columnspan=2)
 
 ######################    Run Program    #####################
-sendBtm = wdg.Button(root, 'Listo')
+sendBtm = wdg.Button(root, 'Listo',
+                     lambda: commands.masiveAddCommand(pathfile.get(), targetpath.get(),
+                                                       [iscoma.get(), istab.get(), isother.get()],
+                                                       separator.get(), encodValue.get(), ishead.get(),
+                                                       [urlFieldNum.get(), namFieldNum.get()]))
 sendBtm.pack()
-
 
 
 root.mainloop()
