@@ -1,5 +1,18 @@
+__author__ = "Ulises Francisco Ruiz Gomez"
+__copyright__ = "Copyright 2022, GPS"
+__credits__ = "GPS"
+
+__version__ = "1.0.1"
+__maintainer__ = "Francisco Ruiz"
+__email__ = "franciscoruiz078@gmail.com"
+__status__ = "Developer"
+
+
+######################       Packages    ##########################
+
 import tkinter as tk
 from tkinter import filedialog
+#--------------------------------------------------------------#
 
 
 def _browseFiles(var):
@@ -7,7 +20,6 @@ def _browseFiles(var):
                                           title="Select a File",
                                           filetypes=(("Text Files",
                                                       "*.csv;*.txt"),))
-
     # Change label contents
     var.set(filename)
 
@@ -73,3 +85,9 @@ class SearchBtm(Button):
         else:
             def function(): return _browseDir(variable)
         Button.__init__(self, div, text, function, htxt=9)
+
+
+class MenuBar(tk.Menu):
+    def __init__(self, root):
+        tk.Menu.__init__(self, root, bg='#134351', tearoff=0, activebackground='#134351', font=(
+            'Arial', 9), fg='#dcdcdc', type='tearoff', activeforeground='#FFBD07')
