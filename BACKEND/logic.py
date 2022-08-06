@@ -61,7 +61,9 @@ def newPlace(root, targetpath, url, cityname):
         file = open(root, 'w')
         json.dump([], file, indent=4)
         file.close()
-
+    
+    if 'https' not in url:
+        return None
     newobj = BetterPlace(targetpath, url, cityname)
     with open(root, 'r+') as cfile:
         content = json.load(cfile)
@@ -130,7 +132,7 @@ def attsFromFile(pathfile, sep, headers, cloc=None, encod=None):
             next(lines)
         for line in lines:
             atts = [att.strip("\n\ufeff") for att in line]
-            if 'http' not in atts[cloc[0]-1]:
+            if 'https' not in atts[cloc[0]-1]:
                 pass
             else:
                 attributes['url'] = atts[cloc[0]-1]
