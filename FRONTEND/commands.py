@@ -8,12 +8,14 @@ __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
 
 ########################    Packages    ########################
+
 import sys
 import os
 from tkinter import messagebox as ms
 from dotenv import load_dotenv as env
 sys.path[0] = sys.path[0][:-8]
 #-----------------------    GPS Pckgs    ----------------------#
+
 from BACKEND import logic
 #--------------------------------------------------------------#
 
@@ -78,12 +80,14 @@ def addCommand(inurl, folder, name):
         try:
             cityname = logic.newPlace(root=os.getenv('root'), url=inurl,
                                   targetpath=folder.replace('/', os.sep), cityname=city)
-            if cityname[0]:
+            if cityname is None:
+                ms.showerror(title="Not URL", message="URL value does not have a correct structure")
+            elif cityname[0]:
                 ms.showinfo(title="New city added",
-                            message=f"{name} HAS ADDED AS {cityname[1]}!")
+                            message=f"'{name}' HAS ADDED AS '{cityname[1]}'")
             else:
                 ms.showinfo(title="City Duplicity",
-                            message=f"{cityname[1]} already exists")
+                            message=f"'{cityname[1]}' already exists")
         except:
             ms.showerror(title="Error", message="Has occured an error")
     else:
@@ -96,5 +100,4 @@ def brief():
         yield [i["city"], i["path"], url]
 
 if __name__=='__main__':
-    # addCommand("https://www.meteoblue.com/es/tiempo/semana/guadalajara_m%c3%a9xico_4005539", "C:\DailyForecast_test", '')
     print(masiveAddCommand(os.getenv('filetest'), os.getenv('absdir'), [0,1,0], None, '', False, [1,2]))
