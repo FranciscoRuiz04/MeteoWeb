@@ -9,6 +9,7 @@ __status__ = "Developer"
 
 ########################    Packages    ########################
 
+from sys import getsizeof
 import requests
 from bs4 import BeautifulSoup
 # from dotenv import load_dotenv as env
@@ -31,7 +32,7 @@ class Daily4cast:
         else:
             _soup = BeautifulSoup(_req.content, 'html.parser')
             self.tag = _soup.find(class_=self._class)
-            self.html = _soup
+            # self.html = _soup
 
     def date_fun(self):
         """
@@ -79,9 +80,9 @@ class Daily4cast:
         (pmin, pmax) or (None, None)
         Outcome (None, None) appears when doesn't have rain forecast
         """
-        
+
         val = self.tag.find(class_='tab-precip').text
-        
+
         separators = ['<', '>', '-']
         for separator in separators:
             if separator in val:
@@ -90,17 +91,17 @@ class Daily4cast:
                 else:
                     values = reversed(val.split(separator))
                 break
-        
+
         values = list(map(lambda x: x.strip(), values))
-        
-        for n,value in enumerate(values):
+
+        for n, value in enumerate(values):
             if value == '':
                 values[n] = None
             else:
                 values[n] = int(values[n].replace('mm', ''))
-        
+
         self.precip = tuple(values)
- 
+
         return self.precip
 
     def sunhrs(self):
@@ -151,10 +152,74 @@ class Last4cast(Daily4cast):
         Daily4cast.__init__(self, url, className)
 
 
+class H3ForeCast:
+
+    def __init__(self, url, className="picto three-hourly-view"):
+        Daily4cast.__init__(self, url, className)
+        self.ws = None
+
+    def __extractCells__(function):
+        def wrap(self, **kargs):
+            row = self.tag.find(class_=kargs['mainDiv'])
+            wholeRecs = [div.text.strip()
+                         for div in row.find_all(class_=kargs['chilDiv'])]
+            wholeRecs.pop(0)
+            return function(self, values=wholeRecs, **kargs)
+        return wrap
+
+    @__extractCells__
+    def _tmps(self, mainDiv, chilDiv, feeling=False, values=None):
+        outcome = list(map(lambda x: int(x[:-1]), values))
+        if feeling:
+            self.feeltmp = outcome
+            return self.feeltmp
+        else:
+            self.tmp = outcome
+            return self.tmp
+    
+    @__extractCells__
+    def _windSpeed(self, mainDiv, chilDiv, values=None):
+        pairs = (pair.split('-') for pair in values)
+        values = ((int(value) for value in pair) for pair in pairs)
+        vmin = []
+        vmax = []
+        for pair in values:
+            vmin.append(next(pair))
+            vmax.append(next(pair))
+        
+        outcome = {}
+        outcome["min"] = vmin
+        outcome["max"] = vmax
+        self.ws = outcome
+        return self.ws
+
+    def _windDirec(self, mainDiv):
+        row = self.tag.find(class_=mainDiv)
+        wholedivs = row.find_all(class_='cell')
+        divs = (wholediv.find('div') for wholediv in wholedivs)
+        next(divs)
+        outcome = [tag.text for tag in divs]
+        self.wd = outcome
+        return self.wd
+
+    def predict(self):
+        self._windDirec('winddirs no-mobile')
+        self._windSpeed(mainDiv='windspeeds', chilDiv='cell no-mobile')
+        
+        sameDiv = 'cell'
+        self._tmps(mainDiv='temperatures', chilDiv=sameDiv, feeling=True)
+        self._tmps(mainDiv='windchills', chilDiv=sameDiv)
+
+
+
 if __name__ == '__main__':
-    import os
+    # import os
     # ini = Daily4cast(
     #     os.getenv('starturl'), 'tab active last')
     # print(ini.tag)
-    ini = Daily4cast(r'https://www.meteoblue.com/es/tiempo/semana/san-miguel-de-allende_m%c3%a9xico_3985344?day=2')
-    print(ini.precip_fun())
+    ini = H3ForeCast(r'https://www.meteoblue.com/es/tiempo/semana/san-miguel-de-allende_m%c3%a9xico_3985344')
+    ini.predict()
+    values = ini.ws
+    print(values)
+    
+    
