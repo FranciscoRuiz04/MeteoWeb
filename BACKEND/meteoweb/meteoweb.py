@@ -9,7 +9,7 @@ __status__ = "Developer"
 
 ########################    Packages    ########################
 
-from sys import getsizeof
+import time
 import requests
 from bs4 import BeautifulSoup
 # from dotenv import load_dotenv as env
@@ -156,70 +156,80 @@ class H3ForeCast:
 
     def __init__(self, url, className="picto three-hourly-view"):
         Daily4cast.__init__(self, url, className)
-        self.ws = None
 
-    def __extractCells__(function):
-        def wrap(self, **kargs):
-            row = self.tag.find(class_=kargs['mainDiv'])
-            wholeRecs = [div.text.strip()
-                         for div in row.find_all(class_=kargs['chilDiv'])]
-            wholeRecs.pop(0)
-            return function(self, values=wholeRecs, **kargs)
-        return wrap
+    def __extractCells__(dropfirst):
+        def inner(fun):
+            def wrap(self, **kargs):
+                row = self.tag.find(class_=kargs['mainDiv'])
+                wholeRecs = [div.text.strip()
+                             for div in row.find_all(class_=kargs['chilDiv'])]
+                if dropfirst:
+                    wholeRecs.pop(0)
+                else:
+                    curval = row.find(
+                        class_=["cell no-mobile now"]).text.strip()
+                    wholeRecs.insert(self._ctime()[0], curval)
+                return fun(self, values=wholeRecs, **kargs)
+            return wrap
+        return inner
 
-    @__extractCells__
-    def _tmps(self, mainDiv, chilDiv, feeling=False, values=None):
+    def _ctime(self):
+        lab = int(self.tag.find(class_='cell time now').text)//100
+        hours = [3, 6, 9, 12, 15, 18, 21, 0]
+        for i, hour in enumerate(hours):
+            if lab == hour:
+                return i, hour
+
+    @__extractCells__(dropfirst=True)
+    def tmp(self, mainDiv, chilDiv, feeling=False, values=None):
         outcome = list(map(lambda x: int(x[:-1]), values))
         if feeling:
-            self.feeltmp = outcome
-            return self.feeltmp
+            self.tempF = outcome
+            return self.tempF
         else:
-            self.tmp = outcome
-            return self.tmp
-    
-    @__extractCells__
-    def _windSpeed(self, mainDiv, chilDiv, values=None):
-        pairs = (pair.split('-') for pair in values)
+            self.temp = outcome
+            return self.temp
+
+    @__extractCells__(dropfirst=False)
+    def windSpeed(self, mainDiv, chilDiv, values=None):
+        self.windS = pairs = (pair.split('-') for pair in values)
         values = ((int(value) for value in pair) for pair in pairs)
         vmin = []
         vmax = []
         for pair in values:
             vmin.append(next(pair))
             vmax.append(next(pair))
-        
+
         outcome = {}
         outcome["min"] = vmin
         outcome["max"] = vmax
-        self.ws = outcome
-        return self.ws
+        self.windS = outcome
+        return self.windS
 
-    def _windDirec(self, mainDiv):
+    def windDirec(self, mainDiv):
         row = self.tag.find(class_=mainDiv)
         wholedivs = row.find_all(class_='cell')
         divs = (wholediv.find('div') for wholediv in wholedivs)
         next(divs)
         outcome = [tag.text for tag in divs]
-        self.wd = outcome
-        return self.wd
+        self.windD = outcome
+        return self.windD
 
     def predict(self):
-        self._windDirec('winddirs no-mobile')
-        self._windSpeed(mainDiv='windspeeds', chilDiv='cell no-mobile')
-        
-        sameDiv = 'cell'
-        self._tmps(mainDiv='temperatures', chilDiv=sameDiv, feeling=True)
-        self._tmps(mainDiv='windchills', chilDiv=sameDiv)
+        self.windDirec('winddirs no-mobile')
 
+        self.windSpeed(mainDiv='windspeeds', chilDiv='cell no-mobile')
+
+        sameDiv = 'cell'
+        self.tmp(mainDiv='temperatures', chilDiv=sameDiv, feeling=True)
+        self.tmp(mainDiv='windchills', chilDiv=sameDiv)
 
 
 if __name__ == '__main__':
-    # import os
-    # ini = Daily4cast(
-    #     os.getenv('starturl'), 'tab active last')
-    # print(ini.tag)
-    ini = H3ForeCast(r'https://www.meteoblue.com/es/tiempo/semana/san-miguel-de-allende_m%c3%a9xico_3985344')
+    import os
+    from dotenv import load_dotenv as env
+    env()
+
+    ini = H3ForeCast(os.getenv('starturl'))
     ini.predict()
-    values = ini.ws
-    print(values)
-    
-    
+    print(ini.windD)
