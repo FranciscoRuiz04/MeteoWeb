@@ -9,7 +9,6 @@ __status__ = "Developer"
 
 ########################    Packages    ########################
 
-import time
 import requests
 from bs4 import BeautifulSoup
 # from dotenv import load_dotenv as env
@@ -221,8 +220,8 @@ class H3ForeCast:
         self.windSpeed(mainDiv='windspeeds', chilDiv='cell no-mobile')
 
         sameDiv = 'cell'
-        self.tmp(mainDiv='temperatures', chilDiv=sameDiv, feeling=True)
-        self.tmp(mainDiv='windchills', chilDiv=sameDiv)
+        self.tmp(mainDiv='temperatures', chilDiv=sameDiv)
+        self.tmp(mainDiv='windchills', chilDiv=sameDiv, feeling=True)
 
 
 if __name__ == '__main__':
