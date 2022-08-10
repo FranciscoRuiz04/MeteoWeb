@@ -11,44 +11,46 @@ __status__ = "Developer"
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-# from dotenv import load_dotenv as env
+from dotenv import load_dotenv as env
 import os
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
-from . import meteoweb as mw
-# import meteoweb as mw
+# from . import meteoweb as mw
+import meteoweb as mw
 
 #--------------------------------------------------------------#
 
 
-# env()  # Get constant values from .env file
+env()  # Get constant values from .env file
 
 
 ########################    Functions    ########################
 
 
 def decorator(function):
-    def tab4cast(url):
+    def tab4cast(url, factor):
         """
         Generate a list with the values fetched from web page
         """
 
         try:
-            data = function(url)
+            data = function(url, factor)
             data.predict()
         except:
-            dfr = [None for _ in range(7)]
+            dfr = [None for _ in range(9)]
         else:
-            # data.wind = str(data.wind[0]) + ' ' + str(data.wind[1])
-            # data.precip = str(data.precip[0]) + ' - ' + str(data.precip[1])
-            dfr = [data.date, data.temp[0], data.temp[1],
-                   data.wind[0], data.wind[1], data.precip[0], data.precip[1], data.sun, data.prev]
+            if factor == 3:
+                dfr = {"Temp": data.temp, "TermSens": data.tempF,
+                       "WSpeed_Min": data.windS["min"], "WSpeed_Max": data.windS["max"], "WDir": data.windD}
+            else:
+                dfr = [data.date, data.temp[0], data.temp[1],
+                       data.wind[0], data.wind[1], data.precip[0], data.precip[1], data.sun, data.prev]
         return dfr
     return tab4cast
 
 
 @decorator
-def normTab(url):
+def normTab(url, factor):
     """
 
     Extract xml format content from 6 firsts days forecast
@@ -60,7 +62,7 @@ def normTab(url):
 
 
 @decorator
-def lastTab(url):
+def lastTab(url, factor):
     """
 
     Extract xml format content from last day forecast
@@ -68,6 +70,12 @@ def lastTab(url):
     """
 
     data = mw.Last4cast(url)
+    return data
+
+
+@decorator
+def h3tab(url, factor):
+    data = mw.H3ForeCast(url)
     return data
 
 
@@ -96,18 +104,32 @@ def get_linked_urls(url):
 # import logging
 # logging.basicConfig(level=logging.DEBUG, format='%(threadName)s:%(message)s')
 
-def run(mainurl):
+
+def run(mainurl, factor=None):
     """
     Extract a dataframe type object with all the information about
     daily forecast ordered by date, using multiple-threads with
     threadpool.
     """
 
-    recs = []
+    # recs = []
     urls = get_linked_urls(mainurl)
     with ThreadPoolExecutor(max_workers=4) as exec:
-        results = exec.map(normTab, urls[:-1])
-        last = exec.submit(lastTab, urls[-1]).result()
+        if factor is None:
+            df = dailyDF(exec, urls, factor)
+            return df
+        elif factor == 3:
+            for result in exec.map(h3tab, urls, [factor]*7):
+                yield result
+        else:
+            pass
+
+
+def dailyDF(exec_obj, urls, factor):
+    results = exec_obj.map(normTab, urls[:-1], [factor]*6)
+    last = exec_obj.submit(lastTab, urls[-1], factor).result()
+
+    recs = []
     for result in results:
         recs.append(result)
     recs.append(last)
@@ -115,9 +137,10 @@ def run(mainurl):
     df = pd.DataFrame(data=recs, columns=[
                       "Date", "Tmin(°C)", "Tmax(°C)", "WSpeed(km/h)", "WDirec", "Pmin(mm)", "Pmax(mm)", "Sun(hrs)", "Prev"])
     df.sort_values(by='Date', ascending=True)
+
     return df
 #--------------------------------------------------------------#
 
 
 if __name__ == '__main__':
-    print(run(os.getenv('starturl')))
+    print(next(run(os.getenv('starturl'), 3)))
