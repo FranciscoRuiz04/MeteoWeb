@@ -11,15 +11,15 @@ __status__ = "Developer"
 ########################    Packages    ########################
 
 import os
-# from dotenv import load_dotenv as env
+from dotenv import load_dotenv as env
 from concurrent.futures import ThreadPoolExecutor
-from apscheduler.schedulers.blocking import BlockingScheduler
+# from apscheduler.schedulers.blocking import BlockingScheduler
 #-----------------------    GPS Pckgs    ----------------------#
 
 import logic
 import index
 #--------------------------------------------------------------#
-
+env()
 
 ########################    Execution    ########################
 def exec():
