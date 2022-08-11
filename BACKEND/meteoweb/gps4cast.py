@@ -11,17 +11,16 @@ __status__ = "Developer"
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv as env
+# from dotenv import load_dotenv as env
 import os
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
-# from . import meteoweb as mw
-import meteoweb as mw
+from . import scrappers as mw
 
 #--------------------------------------------------------------#
 
 
-env()  # Get constant values from .env file
+# env()  # Get constant values from .env file
 
 
 ########################    Functions    ########################
@@ -57,8 +56,8 @@ def normTab(url, factor):
     within <<tab>> tag
     """
 
-    data = mw.Daily4cast(url)
-    return data
+    data2 = mw.Daily4cast(url)
+    return data2
 
 
 @decorator
@@ -69,14 +68,14 @@ def lastTab(url, factor):
     within <<tab>> tag
     """
 
-    data = mw.Last4cast(url)
-    return data
+    data2 = mw.Last4cast(url)
+    return data2
 
 
 @decorator
 def h3tab(url, factor):
-    data = mw.H3ForeCast(url)
-    return data
+    data2 = mw.H3ForeCast(url)
+    return data2
 
 
 ########################    Generators    ########################
@@ -112,17 +111,27 @@ def run(mainurl, factor=None):
     threadpool.
     """
 
-    # recs = []
     urls = get_linked_urls(mainurl)
     with ThreadPoolExecutor(max_workers=4) as exec:
         if factor is None:
-            df = dailyDF(exec, urls, factor)
-            return df
+            outcome = dailyDF(exec, urls, factor)
         elif factor == 3:
-            for result in exec.map(h3tab, urls, [factor]*7):
-                yield result
+            outcome = h3DF(exec, urls, factor)
         else:
             pass
+        
+        return outcome
+
+
+def h3DF(exec_obj, urls, factor):
+    results = exec_obj.map(h3tab, urls, [factor]*7)
+    
+    dfs = []
+    for result in results:
+        df = pd.DataFrame(result)
+        dfs.append(df)
+    
+    return dfs
 
 
 def dailyDF(exec_obj, urls, factor):
@@ -143,4 +152,6 @@ def dailyDF(exec_obj, urls, factor):
 
 
 if __name__ == '__main__':
-    print(next(run(os.getenv('starturl'), 3)))
+    # for i,df in enumerate(run(os.getenv('starturl'), 3)):
+    #     print(df, i, sep='/'*5, end='\n\n')
+    print(run(os.getenv('starturl')))

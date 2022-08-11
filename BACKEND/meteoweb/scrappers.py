@@ -165,9 +165,12 @@ class H3ForeCast:
                 if dropfirst:
                     wholeRecs.pop(0)
                 else:
-                    curval = row.find(
-                        class_=["cell no-mobile now"]).text.strip()
-                    wholeRecs.insert(self._ctime()[0], curval)
+                    try:
+                        curval = row.find(
+                            class_=["cell no-mobile now"]).text.strip()
+                        wholeRecs.insert(self._ctime()[0], curval)
+                    except AttributeError:
+                        wholeRecs = [div.text.strip() for div in row.find_all(class_=kargs['chilDiv'])]
                 return fun(self, values=wholeRecs, **kargs)
             return wrap
         return inner
@@ -191,7 +194,7 @@ class H3ForeCast:
 
     @__extractCells__(dropfirst=False)
     def windSpeed(self, mainDiv, chilDiv, values=None):
-        self.windS = pairs = (pair.split('-') for pair in values)
+        pairs = (pair.split('-') for pair in values)
         values = ((int(value) for value in pair) for pair in pairs)
         vmin = []
         vmax = []
@@ -215,7 +218,7 @@ class H3ForeCast:
         return self.windD
 
     def predict(self):
-        self.windDirec('winddirs no-mobile')
+        self.windDirec(mainDiv='winddirs no-mobile')
 
         self.windSpeed(mainDiv='windspeeds', chilDiv='cell no-mobile')
 
@@ -226,9 +229,6 @@ class H3ForeCast:
 
 if __name__ == '__main__':
     import os
-    from dotenv import load_dotenv as env
-    env()
-
-    ini = H3ForeCast(os.getenv('starturl'))
+    ini = H3ForeCast(r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=2")
     ini.predict()
-    print(ini.windD)
+    print(ini.windS)
