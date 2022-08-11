@@ -32,7 +32,7 @@ def exec():
         try:
             # Generate files with determined properties
             with ThreadPoolExecutor(max_workers=2) as exec:
-                exec.map(index.fun, places)
+                exec.map(index.runAlgorithm, places)
         except:
             raise ValueError("Some value is wrong")
     # finally:

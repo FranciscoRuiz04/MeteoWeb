@@ -24,12 +24,12 @@ from meteoweb import gps4cast
 def isredundant(dfObj, pathfolder):
 
     try:
-        file = os.listdir(pathfolder)[-1]
+        filepath = os.listdir(pathfolder)[-1]
     except IndexError as e:
         print(e)
 
     else:
-        oldFile = pd.read_csv(pathfolder + os.sep + file, encoding='utf-8')
+        oldFile = pd.read_csv(pathfolder + os.sep + filepath, encoding='utf-8')
 
         for n, row in dfObj.iterrows():
 
@@ -51,23 +51,61 @@ def toFile(folder, mainurl, cityname, format='txt'):
     """
 
     content = gps4cast.run(mainurl)
+    content3H = gps4cast.run(mainurl, 3)
 
-    creation = datetime.now().strftime("%b-%d-%Y_%H-%M")
-    name = cityname + '_' + creation
-    file = folder + os.sep + name + '.' + format
+    creation = datetime.now().strftime("%d%m%y_%H%M")
+    day = creation.split('_')[0]
+    time = creation.split('_')[1]
+    
+    name = cityname + '_C' + creation
+    filename = name + '.' + format
+    
+    folders = ['3H', '24H']
+    for fder in folders:
+        childfolder = folder + os.sep + fder
 
-    if not os.path.isdir(folder):
+        try:
+            if fder == '24H':
+                forfile24H(content, filename, childfolder, day)
+            else:
+                forfiles1H_3H(content3H, filename, childfolder, day, time)
+        except:
+            raise RuntimeError("Somthing was wrong. Maybe files were not been created")
+
+
+
+def forfile24H(data, filename, mainfolder, day):
+    folder = mainfolder + os.sep + day
+    filepath = folder + os.sep + filename
+    
+    if not os.path.exists(folder):
         os.makedirs(folder)
-        content.to_csv(file, encoding='utf-8', index=False)
-
+        data.to_csv(filepath, encoding='utf-8', index=False)
     else:
-        if len(os.listdir(folder)) > 0 and not isredundant(content, folder):
-            content.to_csv(file, encoding='utf-8', index=False)
+        if len(os.listdir(folder)) > 0 and not isredundant(data, folder):
+            data.to_csv(filepath, encoding='utf-8', index=False)
 
 
-def fun(place):
+
+def forfiles1H_3H(data, filename, mainfolder, day, time):
+    pathcomponents = [mainfolder, day, time]
+    filefolder = os.sep.join(pathcomponents)
+    if not os.path.exists(filefolder):
+        os.makedirs(filefolder)
+    
+    n = int(day[:2])
+    for df in data:
+        filepath = filefolder + os.sep + str(n) + '_' + filename
+        df.to_csv(filepath, encoding='utf-8', index=False)
+        n += 1
+
+
+def runAlgorithm(place):
     targetPath = place["path"]
     url = place["url"]
     name = place["city"]
 
     return toFile(targetPath, url, name)
+
+if __name__=='__main__':
+    runAlgorithm({"path": "C:\\DailyForecast_test\\Leon","url": r"https://www.meteoblue.com/es/tiempo/semana/le%c3%b3n_m%c3%a9xico_3998655","city": "leon"})
