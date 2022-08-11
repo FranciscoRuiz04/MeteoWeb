@@ -12,11 +12,11 @@ __status__ = "Developer"
 
 from datetime import datetime
 import os
-from meteoweb import gps4cast
 # from dotenv import load_dotenv as env
 import pandas as pd
 #--------------------------------------------------------------#
 # env()  # Get enviroment variables
+from meteoweb import gps4cast
 
 ########################    Functions    ########################
 
