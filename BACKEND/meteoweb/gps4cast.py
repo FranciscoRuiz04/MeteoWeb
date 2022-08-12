@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -42,6 +42,8 @@ def decorator(function):
             if factor == 3:
                 dfr = {"Temp": data.temp, "TermSens": data.tempF,
                        "WSpeed_Min": data.windS["min"], "WSpeed_Max": data.windS["max"], "WDir": data.windD}
+            elif factor == 1:
+                dfr = {"Probability(%)":data.proba, "Precipitation(mm)":data.mm}
             else:
                 dfr = [data.date, data.temp[0], data.temp[1],
                        data.wind[0], data.wind[1], data.precip[0], data.precip[1], data.sun, data.prev]
@@ -68,7 +70,6 @@ def lastTab(url, factor):
     Extract xml format content from last day forecast
     within <<tab>> tag
     """
-
     data2 = mw.Last4cast(url)
     return data2
 
@@ -78,6 +79,11 @@ def h3tab(url, factor):
     data2 = mw.H3ForeCast(url)
     return data2
 
+
+@decorator
+def h1tab(url, factor):
+    data2 = mw.H1ForeCast(url)
+    return data2
 
 ########################    Generators    ########################
 
@@ -119,13 +125,24 @@ def run(mainurl, factor=None):
         elif factor == 3:
             outcome = h3DF(exec, urls, factor)
         else:
-            pass
+            outcome = h1DF(exec, urls, factor)
         
         return outcome
 
 
 def h3DF(exec_obj, urls, factor):
     results = exec_obj.map(h3tab, urls, [factor]*7)
+    
+    dfs = []
+    for result in results:
+        df = pd.DataFrame(result)
+        dfs.append(df)
+    
+    return dfs
+
+
+def h1DF(exec_obj, urls, factor):
+    results = exec_obj.map(h1tab, urls, [factor]*7)
     
     dfs = []
     for result in results:
@@ -146,7 +163,7 @@ def dailyDF(exec_obj, urls, factor):
 
     df = pd.DataFrame(data=recs, columns=[
                       "Date", "Tmin(°C)", "Tmax(°C)", "WSpeed(km/h)", "WDirec", "Pmin(mm)", "Pmax(mm)", "Sun(hrs)", "Prev"])
-    df.sort_values(by='Date', ascending=True)
+    # df.sort_values(by='Date', ascending=True)
 
     return df
 #--------------------------------------------------------------#
@@ -155,4 +172,4 @@ def dailyDF(exec_obj, urls, factor):
 if __name__ == '__main__':
     # for i,df in enumerate(run(os.getenv('starturl'), 3)):
     #     print(df, i, sep='/'*5, end='\n\n')
-    print(run(os.getenv('starturl')))
+    print(run(os.getenv('starturl'), 1))

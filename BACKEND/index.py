@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -51,33 +51,36 @@ def toFile(folder, mainurl, cityname, format='txt'):
     """
 
     content = gps4cast.run(mainurl)
+    content1H = gps4cast.run(mainurl, 1)
     content3H = gps4cast.run(mainurl, 3)
 
     creation = datetime.now().strftime("%d%m%y_%H%M")
     day = creation.split('_')[0]
     time = creation.split('_')[1]
-    
+
     name = cityname + '_C' + creation
     filename = name + '.' + format
-    
-    folders = ['3H', '24H']
+
+    folders = ['1H', '3H', '24H']
     for fder in folders:
         childfolder = folder + os.sep + fder
 
         try:
             if fder == '24H':
                 forfile24H(content, filename, childfolder, day)
+            elif fder == '1H':
+                forfiles1H_3H(content1H, filename, childfolder, day, time)
             else:
                 forfiles1H_3H(content3H, filename, childfolder, day, time)
         except:
-            raise RuntimeError("Somthing was wrong. Maybe files were not been created")
-
+            raise RuntimeError(
+                "Somthing was wrong. Maybe files were not been created")
 
 
 def forfile24H(data, filename, mainfolder, day):
     folder = mainfolder + os.sep + day
     filepath = folder + os.sep + filename
-    
+
     if not os.path.exists(folder):
         os.makedirs(folder)
         data.to_csv(filepath, encoding='utf-8', index=False)
@@ -86,13 +89,12 @@ def forfile24H(data, filename, mainfolder, day):
             data.to_csv(filepath, encoding='utf-8', index=False)
 
 
-
 def forfiles1H_3H(data, filename, mainfolder, day, time):
     pathcomponents = [mainfolder, day, time]
     filefolder = os.sep.join(pathcomponents)
     if not os.path.exists(filefolder):
         os.makedirs(filefolder)
-    
+
     n = int(day[:2])
     for df in data:
         filepath = filefolder + os.sep + str(n) + '_' + filename
@@ -106,6 +108,3 @@ def runAlgorithm(place):
     name = place["city"]
 
     return toFile(targetPath, url, name)
-
-if __name__=='__main__':
-    runAlgorithm({"path": "C:\\DailyForecast_test\\Leon","url": r"https://www.meteoblue.com/es/tiempo/semana/le%c3%b3n_m%c3%a9xico_3998655","city": "leon"})

@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -227,8 +227,61 @@ class H3ForeCast:
         self.tmp(mainDiv='windchills', chilDiv=sameDiv, feeling=True)
 
 
+class H1ForeCast:
+    
+    def __init__(self, url):
+        H3ForeCast.__init__(self, url)
+    
+    def completeDesc(function):
+        def wrap(self, *kargs):
+            ps = self.tag.find_all('p')
+            l = [t.text.strip() for t in ps][:24]
+            return function(self, cd=l)
+        return wrap
+    
+    @completeDesc
+    def time_fun(self, cd):
+        timelist = []
+        for hour in cd:
+            hour.split('a')
+            timelist.append(hour[:13])
+        
+        self.time = timelist
+        return self.time
+    
+    @completeDesc
+    def probability(self, cd):
+        percents = []
+        for desc in cd:
+            percent = int(desc[14:].split('%')[0])
+            percents.append(percent)
+        
+        self.proba = percents
+        return self.proba
+    
+    @completeDesc
+    def millimeters(self, cd):
+        mms = []
+        for desc in cd:
+            descp = desc.split('.')[1]
+            mm = int(descp.split()[0])
+            mms.append(mm)
+        
+        self.mm = mms
+        return self.mm
+    
+    def predict(self):
+        self.millimeters()
+        self.probability()
+
+
 if __name__ == '__main__':
     import os
-    ini = H3ForeCast(r"https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=2")
+    ini = H1ForeCast(os.getenv('starturl'))
+    # for text in ini.info():
+    #     print(text, end='\n\n')
     ini.predict()
-    print(ini.windS)
+    print(ini.proba, ini.mm)
+    # print(ini.probability(), ini.millimeters(), sep='\n')
+    # ini.predict()
+    # print(ini.windS)
