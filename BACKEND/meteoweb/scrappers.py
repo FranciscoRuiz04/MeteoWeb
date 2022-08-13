@@ -11,15 +11,36 @@ __status__ = "Developer"
 
 import requests
 from bs4 import BeautifulSoup
-# from dotenv import load_dotenv as env
 #--------------------------------------------------------------#
-
-# env()  # Get enviroment variables from .env file
 
 
 ########################    Classes    ########################
 
 class Daily4cast:
+
+    """
+
+    Webscrapper to get information from meteoblue portal about the
+    weather forecast for the current day and the next 6 days. Parameters
+    like min and max temperatures, min and max precipitation, hours with
+    sun, wind speed and direction, and forecast date are possible to get.
+
+
+    Class object has the next initial attributes:\n
+
+    self.url -> str type object with URL direction from which will be
+    done the scrapping.\n
+    self._class -> str type object with the tag class name used as
+    reference to get the master content where is the predictions.\n
+    self.tag -> bs4.element type object with the master content.\n
+
+    IMPORTANT:\n
+    To get the attributes self.date, self.temp, self.wind, self.precip,
+    self.sun or self.prev is necessary to run either the functions date_fun(),
+    tmp(), wind_fun(), precip_fun(), sunhrs() or previsibility() respectively
+    one by one or solely predict() function.
+
+    """
 
     def __init__(self, url, className="tab active"):
         self.url = url
@@ -31,7 +52,6 @@ class Daily4cast:
         else:
             _soup = BeautifulSoup(_req.content, 'html.parser')
             self.tag = _soup.find(class_=self._class)
-            # self.html = _soup
 
     def date_fun(self):
         """
@@ -76,8 +96,8 @@ class Daily4cast:
         """
         Get precipitation from tag with 'tab-precip' class name
         Two kind of tuples could get:
-        (pmin, pmax) or (None, None)
-        Outcome (None, None) appears when doesn't have rain forecast
+        (pmin, pmax) or (-999, -999)
+        Outcome (-999, -999) appears when doesn't have rain forecast
         """
 
         val = self.tag.find(class_='tab-precip').text
@@ -88,16 +108,18 @@ class Daily4cast:
                 if separator == '-' or separator == '<':
                     values = val.split(separator)
                 else:
-                    values = reversed(val.split(separator))
+                    values = list(reversed(val.split(separator)))
+                    values[1] = int(values[0].replace('mm', '')) * 2
                 break
-
-        values = list(map(lambda x: x.strip(), values))
 
         for n, value in enumerate(values):
             if value == '':
-                values[n] = None
+                values[n] = -999
             else:
-                values[n] = int(values[n].replace('mm', ''))
+                try:
+                    values[n] = int(values[n].replace('mm', ''))
+                except AttributeError:
+                    pass
 
         self.precip = tuple(values)
 
@@ -147,16 +169,63 @@ class Daily4cast:
 
 
 class Last4cast(Daily4cast):
+
+    """
+    Daily4Cast object subclass to get information from meteoblue portal
+    about the weather forecast for 6 days after the current date. Parameters
+    like min and max temperatures, min and max precipitation, hours with
+    sun, wind speed and direction, and forecast date are possible to get.
+
+
+    Class object has the next initial attributes:\n
+
+    self.url -> str type object with URL direction from which will be
+    done the scrapping.\n
+    self._class -> str type object with the tag class name used as
+    reference to get the master content where is the predictions.\n
+    self.tag -> bs4.element type object with the master content.\n
+
+    IMPORTANT:\n
+    To get the attributes self.date, self.temp, self.wind, self.precip,
+    self.sun or self.prev is necessary to run either the functions date_fun(),
+    tmp(), wind_fun(), precip_fun(), sunhrs() or previsibility() respectively
+    one by one or solely predict() function.
+
+    """
+
     def __init__(self, url, className="tab active last"):
         Daily4cast.__init__(self, url, className)
 
 
 class H3ForeCast:
 
+    """
+
+    Webscrapper to get information from meteoblue portal about the
+    weather forecast for the current day and the next 6 days every 3 hours.
+    Parameters like min and max temperatures, min and max thermal sensation,
+    and wind speed and direction are possible to get.
+
+
+    Class object has the next initial attributes:\n
+
+    self.url -> str type object with URL direction from which will be
+    done the scrapping.\n
+    self._class -> str type object with the tag class name used as
+    reference to get the master content where is the predictions.\n
+    self.tag -> bs4.element type object with the master content.\n
+
+    IMPORTANT:\n
+    To get the attributes self.temp, self.windS, self.windD, and self.tempF
+    is necessary to run either the functions tmp(), windSpeed(), windDir() or
+    one by one or solely predict() function.
+
+    """
+
     def __init__(self, url, className="picto three-hourly-view"):
         Daily4cast.__init__(self, url, className)
 
-    def __extractCells__(dropfirst):
+    def __extractCells(dropfirst):
         def inner(fun):
             def wrap(self, **kargs):
                 row = self.tag.find(class_=kargs['mainDiv'])
@@ -168,23 +237,44 @@ class H3ForeCast:
                     try:
                         curval = row.find(
                             class_=["cell no-mobile now"]).text.strip()
-                        wholeRecs.insert(self._ctime()[0], curval)
+                        wholeRecs.insert(self.__ctime()[0], curval)
                     except AttributeError:
-                        wholeRecs = [div.text.strip() for div in row.find_all(class_=kargs['chilDiv'])]
+                        wholeRecs = [div.text.strip() for div in row.find_all(
+                            class_=kargs['chilDiv'])]
                 return fun(self, values=wholeRecs, **kargs)
             return wrap
         return inner
 
-    def _ctime(self):
+    def __ctime(self):
         lab = int(self.tag.find(class_='cell time now').text)//100
         hours = [3, 6, 9, 12, 15, 18, 21, 0]
         for i, hour in enumerate(hours):
             if lab == hour:
                 return i, hour
 
-    @__extractCells__(dropfirst=True)
+    @__extractCells(dropfirst=True)
     def tmp(self, mainDiv, chilDiv, feeling=False, values=None):
-        outcome = list(map(lambda x: int(x[:-1]), values))
+        """
+
+        Get the mean temperature in Celsius degrees.
+        A list type object is the outcome with the next format:
+        [val1, val2, ...]
+        Every value is float type.
+
+        Parameters:\n
+        <mainDiv>
+        Father tag classname where is the complete row inside
+        the html table.
+        <chilDiv>
+        Child tag classname where is every table cell.
+        <feeling>
+        If True thermal sensation values will be get. By default
+        is False.
+        <Values>
+        A list with the amounts only as str type objects.
+
+        """
+        outcome = list(map(lambda x: float(x[:-1]), values))
         if feeling:
             self.tempF = outcome
             return self.tempF
@@ -192,8 +282,27 @@ class H3ForeCast:
             self.temp = outcome
             return self.temp
 
-    @__extractCells__(dropfirst=False)
+    @__extractCells(dropfirst=False)
     def windSpeed(self, mainDiv, chilDiv, values=None):
+        """
+
+        Get the wind speed range in km/h.
+        A dictionary type object is the outcome with the min and max values
+        inside a list type object.
+        The format is as follows:
+        {"min":[val1, val2, ...], "max":[val1, val2, ...]}
+        Both values are integers list.
+
+        Parameters:\n
+        <mainDiv>
+        Father tag classname where is the complete row inside
+        the html table.
+        <chilDiv>
+        Child tag classname where is every table cell.
+        <Values>
+        A list with the amounts only as str type objects.
+
+        """
         pairs = (pair.split('-') for pair in values)
         values = ((int(value) for value in pair) for pair in pairs)
         vmin = []
@@ -209,6 +318,19 @@ class H3ForeCast:
         return self.windS
 
     def windDirec(self, mainDiv):
+        """
+
+        Get the wind direction.
+        A list type object is the outcome with the next format:
+        ["Dir1", "Dir2", ...]
+        Every list element is integer type.
+
+        Parameters:\n
+        <mainDiv>
+        Father tag classname where is the complete row inside
+        the html table.
+
+        """
         row = self.tag.find(class_=mainDiv)
         wholedivs = row.find_all(class_='cell')
         divs = (wholediv.find('div') for wholediv in wholedivs)
@@ -218,6 +340,18 @@ class H3ForeCast:
         return self.windD
 
     def predict(self):
+        """
+
+        Fetch all the variables considered by the class with just
+        run this function.
+        Variables will be saved in:
+        self.temp = Temperature
+        self.tempF = Thermal Sensation
+        self.windS = Wind Speed
+        self.windD = Wind Direction
+
+        """
+
         self.windDirec(mainDiv='winddirs no-mobile')
 
         self.windSpeed(mainDiv='windspeeds', chilDiv='cell no-mobile')
@@ -228,60 +362,136 @@ class H3ForeCast:
 
 
 class H1ForeCast:
-    
+
+    """
+
+    Webscrapper to get information from meteoblue portal about the
+    weather forecast for the current day and the next 6 days every hour.
+    Parameters like precipitation probability and precipitation amout
+    are possible to get.
+
+
+    Class object has the next initial attributes:\n
+
+    self.url -> str type object with URL direction from which will be
+    done the scrapping.\n
+    self._class -> str type object with the tag class name used as
+    reference to get the master content where is the predictions.\n
+    self.tag -> bs4.element type object with the master content.\n
+
+    IMPORTANT:\n
+    To get the attributes self.prob and self.mm is necessary to run
+    either the functions probability() and millimeters() one by one
+    or solely predict() function.
+
+    """
+
     def __init__(self, url):
         H3ForeCast.__init__(self, url)
-    
-    def completeDesc(function):
+
+    def __completeDesc(function):
         def wrap(self, *kargs):
             ps = self.tag.find_all('p')
             l = [t.text.strip() for t in ps][:24]
             return function(self, cd=l)
         return wrap
-    
-    @completeDesc
-    def time_fun(self, cd):
+
+    @__completeDesc
+    def _time_fun(self, cd):
+        """
+
+        Get a list of lists with the considered hours for
+        the forecast.
+
+        Parameters:\n
+        <cd>
+        List type object with the complete description for every 
+        forecasted hour.
+
+        """
         timelist = []
         for hour in cd:
             hour.split('a')
             timelist.append(hour[:13])
-        
+
         self.time = timelist
         return self.time
-    
-    @completeDesc
+
+    @__completeDesc
     def probability(self, cd):
+        """
+
+        Get a list with the precipitation probability
+        percentages.
+        Every value is integer type.
+
+        Parameters:\n
+        <cd>
+        List type object with the complete description for every 
+        forecasted hour.
+
+        """
+
         percents = []
         for desc in cd:
             percent = int(desc[14:].split('%')[0])
             percents.append(percent)
-        
+
         self.proba = percents
         return self.proba
-    
-    @completeDesc
+
+    @__completeDesc
     def millimeters(self, cd):
+        """
+
+        Get a list with the precipitation amounts in millimeters.
+        Every value is float type.
+
+        Parameters:\n
+        <cd>
+        List type object with the complete description for every 
+        forecasted hour.
+
+        """
+
         mms = []
         for desc in cd:
             descp = desc.split('.')[1]
-            mm = int(descp.split()[0])
+            mm = float(descp.split()[0])
             mms.append(mm)
-        
+
         self.mm = mms
         return self.mm
-    
+
     def predict(self):
+        """
+
+        Fetch all the variables considered by the class with just
+        run this function.
+        Variables will be saved in:
+        self.mm = Precipitation Amouts in mm
+        self.proba = Precipitation Probability in %
+
+        """
+
         self.millimeters()
         self.probability()
 
 
 if __name__ == '__main__':
     import os
+    from dotenv import load_dotenv as env
+    env()
+    
     ini = H1ForeCast(os.getenv('starturl'))
+    ini.predict()
+    print(ini.probability())
+    # ini.predict()
+    # print(type(ini.temp))
     # for text in ini.info():
     #     print(text, end='\n\n')
-    ini.predict()
-    print(ini.proba, ini.mm)
+    # ini.predict()
+    # print(ini.proba, ini.mm)
     # print(ini.probability(), ini.millimeters(), sep='\n')
     # ini.predict()
     # print(ini.windS)
