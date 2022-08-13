@@ -10,8 +10,9 @@ __status__ = "Developer"
 
 ########################    Packages    ########################
 
-import os
+import os, sys
 from dotenv import load_dotenv as env
+sys.path.append(os.getenv('BACKENDMods'))
 from concurrent.futures import ThreadPoolExecutor
 # from apscheduler.schedulers.blocking import BlockingScheduler
 #-----------------------    GPS Pckgs    ----------------------#

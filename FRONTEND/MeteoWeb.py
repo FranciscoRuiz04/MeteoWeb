@@ -11,7 +11,9 @@ __status__ = "Developer"
 ######################       Packages    ##########################
 
 import tkinter as tk
-import os
+import os, sys
+sys.path.append(os.getenv('BACKENDMods'))
+sys.path.append(os.getenv('FRONTENDMods'))
 #-----------------------    GPS Pckgs    ----------------------#
 
 from FRONTEND.winds import main, drop, fromfile, newrecord
