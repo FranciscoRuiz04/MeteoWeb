@@ -11,17 +11,13 @@ __status__ = "Developer"
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-# from dotenv import load_dotenv as env
 import os
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
 from . import scrappers as mw
 # import scrappers as mw
-
 #--------------------------------------------------------------#
 
-
-# env()  # Get constant values from .env file
 
 
 ########################    Functions    ########################
@@ -170,6 +166,9 @@ def dailyDF(exec_obj, urls, factor):
 
 
 if __name__ == '__main__':
+    import os
+    from dotenv import load_dotenv as env
+    env()
     # for i,df in enumerate(run(os.getenv('starturl'), 3)):
     #     print(df, i, sep='/'*5, end='\n\n')
-    print(run(os.getenv('starturl'), 1))
+    print(run(os.getenv('starturl'), 3))
