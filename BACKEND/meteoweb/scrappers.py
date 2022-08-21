@@ -52,6 +52,14 @@ class Daily4cast:
         else:
             _soup = BeautifulSoup(_req.content, 'html.parser')
             self.tag = _soup.find(class_=self._class)
+            
+            # Get geographic coordinates
+            lat = _soup.find('meta', itemprop='latitude').get('content')
+            lon = _soup.find('meta', itemprop='longitude').get('content')
+            elev = _soup.find('meta', itemprop='elevation').get('content')
+            self.coords = list(map(float, [lat, lon, elev]))
+            
+            
 
     def date_fun(self):
         """
@@ -113,13 +121,16 @@ class Daily4cast:
                 break
 
         for n, value in enumerate(values):
-            if value == '':
-                values[n] = -999
-            else:
-                try:
-                    values[n] = int(values[n].replace('mm', ''))
-                except AttributeError:
-                    pass
+            try:
+                if value.strip() == '':
+                    values[n] = -999
+                else:
+                    try:
+                        values[n] = int(values[n].replace('mm', ''))
+                    except AttributeError:
+                        pass
+            except AttributeError:
+                pass
 
         self.precip = tuple(values)
 
@@ -483,10 +494,11 @@ if __name__ == '__main__':
     from dotenv import load_dotenv as env
     env()
     
-    ini = H1ForeCast(os.getenv('starturl'))
+    ini = Daily4cast(os.getenv('starturl'))
     ini.predict()
-    print(ini.probability())
-    # ini.predict()
+    # print(ini.probability())
+    
+    # # ini.predict()
     # print(type(ini.temp))
     # for text in ini.info():
     #     print(text, end='\n\n')
