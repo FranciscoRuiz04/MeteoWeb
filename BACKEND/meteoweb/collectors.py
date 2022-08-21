@@ -96,9 +96,9 @@ class H3Array:
     def __init__(self, url):
         DailyArray.__init__(self, url)
     
-    def genArray(self, dataframe=True):
+    def firstDay(self, url, dataframe=True):
         try:
-            data = scr.H3ForeCast(self.url)
+            data = scr.H3ForeCast(url)
             data.predict()
         except:
             raise ExecError("Prediction has not been executed")
@@ -111,6 +111,13 @@ class H3Array:
             else: outcome = content
             
             return outcome
+    
+    def genArray(self):
+        dflist = []
+        for url in self.urls:
+            info = self.firstDay(url)
+            dflist.append(info)
+        return dflist
 
 
 class H1Array(H3Array):
@@ -118,17 +125,19 @@ class H1Array(H3Array):
     def __init__(self, url):
         super().__init__(url)
     
-    def genArray(self, dataframe=True):
+    def firstDay(self, url, dataframe=True):
         try:
-            data = scr.H1ForeCast(self.url)
+            data = scr.H1ForeCast(url)
             data.predict()
         except:
             raise ExecError("Prediction has not been executed")
         else:
             content = {"Probability(%)":data.proba, "Precipitation(mm)":data.mm}
             
-            if dataframe: outcome = pd.DataFrame(content)
-            else: outcome = data
+            if dataframe:
+                outcome = pd.DataFrame(content)
+            else:
+                outcome = content
             
             return outcome
 
