@@ -10,26 +10,32 @@ __status__ = "Developer"
 
 ########################    Packages    ########################
 import pandas as pd
-import os
+# import os
 #-----------------------    GPS Pckgs    ----------------------#
 
-from meteoweb import creators
-import logic
+## Module importation to exec file creation
+from BACKEND.meteoweb import creators
+
+## Module importation to be developing
+# from meteoweb import creators
 #--------------------------------------------------------------#
 
 def exec(gen):
     df = pd.DataFrame(columns=["Loc", "%", "mm", "°C_min",
                                    "°C_max", "km/h", "WindDir",
                                    "Date"])
+    numrecs = 0
     for g in gen:
         objClass = creators.File_Brief(g, 'txt', 'utf-8')
         for rec in objClass.FormatRecords():
             df.loc[len(df)] = rec
+            numrecs += 1
     objClass.FilePath()
     df.to_csv(objClass.filepath, encoding='utf-8',index_label='ID')
+    return {"nrecs":numrecs, "filedir":objClass.filedir, "filename":objClass.filename}
 
 #--------------------------------------------------------------#
 
-exec(logic.getPlaces(os.getenv('root')))
+# exec(logic.getPlaces(os.getenv('root')))
 
 #--------------------------------------------------------------#
