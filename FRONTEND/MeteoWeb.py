@@ -52,16 +52,16 @@ toolsmenu = wdg.MenuBar(menubar)
 menubar.add_cascade(label="Herramientas", menu=toolsmenu)
 
 options = wdg.MenuBar(toolsmenu)
-options.add_command(label='Manual', command=lambda: newrecord.new(root))
+toolsmenu.add_command(label='Borrar', command=lambda: drop.drop(root))
 options.add_command(label="Desde Archivo",
                     command=lambda: fromfile.importwind(root))
+options.add_command(label='Manual', command=lambda: newrecord.new(root))
 toolsmenu.add_cascade(label='Nuevo', menu=options)
-toolsmenu.add_command(label='Borrar', command=lambda: drop.drop(root))
 toolsmenu.add_separator()
 
 statOpts = wdg.MenuBar(toolsmenu)
-statOpts.add_command(label='Resumen', command=lambda:commands.summarize(root))
 statOpts.add_command(label='Pronóstico', command=lambda: commands.forecast(root))
+statOpts.add_command(label='Resumen', command=lambda:commands.summarize(root))
 toolsmenu.add_cascade(label='Generar', menu=statOpts)
 
 helpmenu = wdg.MenuBar(menubar)
