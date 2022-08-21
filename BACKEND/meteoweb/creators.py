@@ -149,7 +149,7 @@ class File_Brief(File_24H):
         filename = name + '.' + self.format
         self.filename = filename
 
-    def FileDir(self, mainFolderName='Resumenes'):
+    def FileDir(self, mainFolderName='Summations'):
         self.Filename()
         childfolder = self.tp.split(os.sep)
         self.filedir = os.sep.join(childfolder[:-1]) + os.sep + mainFolderName
@@ -171,8 +171,6 @@ class File_Brief(File_24H):
 if __name__ == '__main__':
     from dotenv import load_dotenv as env
     env()
-    ini = File_Brief({"path": "C:\\DailyForecast_test\\gto_capital",
-        "url": "https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270",
-        "city": "gto_capital"}, 'txt', 'utf-8')
+    ini = File_Brief(os.getenv('json'), 'txt', 'utf-8')
     import sys
-    print(sys.getsizeof(next(ini.FormatFile())))
+    print(sys.getsizeof(next(ini.FormatRecords())))
