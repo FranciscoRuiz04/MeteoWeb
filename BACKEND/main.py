@@ -14,7 +14,6 @@ import os, sys
 from dotenv import load_dotenv as env
 sys.path.append(os.getenv('BACKENDMods'))
 from concurrent.futures import ThreadPoolExecutor
-# from apscheduler.schedulers.blocking import BlockingScheduler
 #-----------------------    GPS Pckgs    ----------------------#
 
 import logic
@@ -31,7 +30,9 @@ def run(place):
     obj2.NewFile()
     obj3.NewFile()
 
+
 ########################    Execution    ########################
+
 def exec():
     try:
         # Get place properties for every object in JSON file
@@ -45,11 +46,8 @@ def exec():
                 exec.map(run, places)
         except:
             raise ValueError("Some value is wrong")
-    # finally:
-    #     print('Algorithm runned')
-        
+#--------------------------------------------------------------#
+
 exec()
-########################    Schedule    ########################
-# scheduler = BlockingScheduler()
-# scheduler.add_job(exec, 'interval', hours=1)
-# scheduler.start()
+
+#--------------------------------------------------------------#
