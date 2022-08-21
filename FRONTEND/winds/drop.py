@@ -13,8 +13,13 @@ __status__ = "Developer"
 import tkinter as tk
 #-----------------------    GPS Pckgs    ----------------------#
 
+## Module importation to exec file creation
 from FRONTEND import widgets as wdg
 from FRONTEND import commands
+
+## Module importation to be developing
+# import widgets as wdg
+# import commands
 #--------------------------------------------------------------#
 
 
@@ -25,7 +30,8 @@ def drop(root):
     root.resizable(False, False)
     root.config(bg='#818284')
     root.title('Borrar Registro')
-
+    root.focus_force()
+    
     # Main Frame
     div3 = wdg.LabelFrame(root)
     div3.pack(fill='x', padx=10, pady=10)

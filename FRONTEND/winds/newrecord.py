@@ -25,6 +25,7 @@ def new(root):
     root.resizable(False, False)
     root.config(bg='#818284')
     root.title('Nueva Locación')
+    root.focus_force()
 
     ######################     Frame      ##########################
     div1 = wdg.LabelFrame(root)

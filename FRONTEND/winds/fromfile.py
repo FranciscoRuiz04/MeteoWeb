@@ -25,6 +25,7 @@ def importwind(root):
     root.resizable(False, False)
     root.config(bg='#818284')
     root.title('Carga Masiva')
+    root.focus_force()
 
     ########################    I/O    ########################
     div1 = wdg.LabelFrame(root)

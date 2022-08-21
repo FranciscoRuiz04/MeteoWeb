@@ -12,15 +12,18 @@ import tkinter as tk
 from tkinter import LEFT, RIGHT, ttk
 
 #-----------------------    GPS Pckgs    ----------------------#
+## Module importation to exec file creation
 from FRONTEND import commands
-# import commands
+from FRONTEND import widgets as wdg
+
+## Module importation to be developing
 # try:
 #     import widgets as wdg
 # except ModuleNotFoundError:
 #     import sys
 #     sys.path.append(r'C:\CODES\MeteoWeb\FRONTEND')
 #     import widgets as wdg
-from FRONTEND import widgets as wdg
+    # import commands
 #--------------------------------------------------------------#
 def win(root):
     # Root window
@@ -29,6 +32,7 @@ def win(root):
     root.resizable(False, False)
     root.config(bg='#818284')
     root.title('Registros')
+    root.focus_force()
     
     div7 = wdg.LabelFrame(root, bg='#858784', height=8)
     div7.pack(padx=6, fill='x')
