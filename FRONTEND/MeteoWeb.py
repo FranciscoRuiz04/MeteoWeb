@@ -12,23 +12,33 @@ __status__ = "Developer"
 
 import tkinter as tk
 import os, sys
+from dotenv import load_dotenv as env
+env()
 sys.path.append(os.getenv('BACKENDMods'))
 sys.path.append(os.getenv('FRONTENDMods'))
 #-----------------------    GPS Pckgs    ----------------------#
-
+## Module importation to exec file creation
 from FRONTEND.winds import main, drop, fromfile, newrecord
 from FRONTEND import widgets as wdg
+from FRONTEND import commands
+
+## Module importation to be developing
+# from winds import main, drop, fromfile, newrecord
+# import widgets as wdg
+# import commands
 #--------------------------------------------------------------#
 
 
 ######################       Root window    ##########################
 root = tk.Tk()
-root.geometry('230x140')
+root.geometry('220x145')
 root.resizable(False, False)
 root.config(bg='#818284')
 root.title('Inicio')
 logo = tk.PhotoImage(file=os.getenv('logopath'))
 root.iconphoto(True, logo)
+
+# root.eval('tk::PlaceWindow . center')
 
 
 ######################       Menu Bar    ##########################
@@ -40,13 +50,18 @@ menubar.add_cascade(label='Ver', menu=home)
 
 toolsmenu = wdg.MenuBar(menubar)
 menubar.add_cascade(label="Herramientas", menu=toolsmenu)
+
 options = wdg.MenuBar(toolsmenu)
 options.add_command(label='Manual', command=lambda: newrecord.new(root))
 options.add_command(label="Desde Archivo",
                     command=lambda: fromfile.importwind(root))
 toolsmenu.add_cascade(label='Nuevo', menu=options)
 toolsmenu.add_command(label='Borrar', command=lambda: drop.drop(root))
+toolsmenu.add_separator()
 
+statOpts = wdg.MenuBar(toolsmenu)
+statOpts.add_command(label='Resumen', command=lambda:commands.summarize(root))
+toolsmenu.add_cascade(label='Generar', menu=statOpts)
 
 helpmenu = wdg.MenuBar(menubar)
 helpmenu.add_command(label="Acerca de")
