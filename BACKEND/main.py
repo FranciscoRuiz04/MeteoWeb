@@ -18,9 +18,18 @@ from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
 
 import logic
-import index
+from meteoweb import creators
 #--------------------------------------------------------------#
 env()
+
+def run(place):
+    obj1 = creators.File_24H(place, 'txt', 'utf-8')
+    obj2 = creators.File_3H(place, 'txt', 'utf-8')
+    obj3 = creators.File_1H(place, 'txt', 'utf-8')
+    
+    obj1.NewFile()
+    obj2.NewFile()
+    obj3.NewFile()
 
 ########################    Execution    ########################
 def exec():
@@ -33,7 +42,7 @@ def exec():
         try:
             # Generate files with determined properties
             with ThreadPoolExecutor(max_workers=2) as exec:
-                exec.map(index.runAlgorithm, places)
+                exec.map(run, places)
         except:
             raise ValueError("Some value is wrong")
     # finally:
