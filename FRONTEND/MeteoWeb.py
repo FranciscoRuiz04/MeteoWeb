@@ -61,6 +61,7 @@ toolsmenu.add_separator()
 
 statOpts = wdg.MenuBar(toolsmenu)
 statOpts.add_command(label='Resumen', command=lambda:commands.summarize(root))
+statOpts.add_command(label='Pronóstico', command=lambda: commands.forecast(root))
 toolsmenu.add_cascade(label='Generar', menu=statOpts)
 
 helpmenu = wdg.MenuBar(menubar)
