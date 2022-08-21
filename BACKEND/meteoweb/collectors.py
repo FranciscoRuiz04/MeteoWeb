@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
 from . import scrappers as scr
+# import scrappers as scr
 #--------------------------------------------------------------#
 
 
@@ -20,6 +21,7 @@ def _genLinks(item):
         yield path
 #--------------------------------------------------------------#
 
+########################    Function    ########################
 
 def get_linked_urls(url):
     req = requests.get(url)
@@ -30,7 +32,7 @@ def get_linked_urls(url):
     for link in links:
         urls.append(link)
     return urls
-
+#--------------------------------------------------------------#
 
 
 
@@ -56,9 +58,9 @@ class DailyArray:
         finally:
             return dfr
     
-    def today(self):
-        firstlink = self.url
-        first = self.__genDailyrow(firstlink)
+    def today(self, url, last=False):
+        firstlink = url
+        first = self.__genDailyrow(firstlink, last)
         return first
 
     def sixFirstDays(self):
@@ -142,9 +144,37 @@ class H1Array(H3Array):
             return outcome
 
 
+class Brief(DailyArray):
+    
+    def __init__(self, url):
+        DailyArray.__init__(self, url)
+    
+    def baseArray(self, url, last):
+        supdata = DailyArray.today(self, url, last)
+        data = supdata[1:5]
+        data.append(supdata[0])
+        return data
+    
+    def precipitation(self, url):
+        df = H1Array.firstDay(self, url)
+        percent = df["Probability(%)"].max()
+        accumrain = df["Precipitation(mm)"].sum()
+        pair = [percent, accumrain]
+        return pair
+    
+    def genArray(self, url, last=False):
+        with ThreadPoolExecutor(max_workers=2) as exec:
+            pdata = exec.submit(self.precipitation, url).result()
+            restdata = exec.submit(self.baseArray, url, last).result()
+        fulldata = pdata + restdata
+        return fulldata
+
+
+
+
 if __name__=='__main__':
     import os
     from dotenv import load_dotenv as env
     env()
-    ini = H1Array(os.getenv('starturl'))
-    print(ini.genArray())
+    ini = Brief(os.getenv('starturl'))
+    print(ini.genArray(os.getenv('starturl')))
