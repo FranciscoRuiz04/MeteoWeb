@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 import pandas as pd
 #-----------------------    GPS Pckgs    ----------------------#
-import collectors
+from meteoweb import collectors
 #--------------------------------------------------------------#
 
 
