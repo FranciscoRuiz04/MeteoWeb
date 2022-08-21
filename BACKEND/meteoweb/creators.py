@@ -12,9 +12,11 @@ __status__ = "Developer"
 from datetime import datetime
 import os
 import pandas as pd
-from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
-from meteoweb import collectors
+## Module importation to exec file creation
+from . import collectors
+
+## Module importation to be developing
 # import collectors
 #--------------------------------------------------------------#
 
