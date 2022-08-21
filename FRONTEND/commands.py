@@ -24,14 +24,44 @@ from . import widgets as wdg
 # import widgets as wdg
 from BACKEND import logic
 from BACKEND import summation
+from BACKEND import main
 #--------------------------------------------------------------#
 
 env()
 
+def forecast(root):
+    try:
+        t = Thread(target=main.exec, daemon=True)
+        t.start()
+        loading = tk.Toplevel(root)
+        loading.title('Running Process')
+        # loading.overrideredirect(1)
+        loading.wm_attributes()
+        loading.wm_attributes('-disabled', True)
+        # loading.wm_attributes("-alpha", 0.9)
+        loading.wm_geometry('200x70')
+        root.eval(f'tk::PlaceWindow {str(loading)} center')
+
+        loading_lab = wdg.EntryName(loading, text='\nProceso en ejecución...\n\nPor favor espere.\n')
+        loading_lab.pack(fill='both')
+        loading.focus_force()
+        while t.is_alive():
+            root.update()
+        # out = summation.exec(logic.getPlaces(os.getenv('root')))
+    except AttributeError as e:
+        ms.showerror(title="Format Error", message=e)
+    except:
+        ms.showerror(title='Unknown Error', message="Has occured an error")
+    else:
+        loading.destroy()
+        text = f"Pronóstico Generado"
+        ms.showinfo(title="Tarea Finalizada", message=text)
+
+
 def __myfun():
     global out
     out = summation.exec(logic.getPlaces(os.getenv('root')))
-    
+
 
 def summarize(root):
     try:
