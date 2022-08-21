@@ -1,3 +1,4 @@
+
 __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
@@ -12,14 +13,53 @@ __status__ = "Developer"
 import sys
 import os
 from tkinter import messagebox as ms
+from threading import Thread
 from dotenv import load_dotenv as env
+import tkinter as tk
 sys.path[0] = sys.path[0][:-8]
 #-----------------------    GPS Pckgs    ----------------------#
-
+## Module importation to exec file creation
+from . import widgets as wdg
+## Module importation to be developing
+# import widgets as wdg
 from BACKEND import logic
+from BACKEND import summation
 #--------------------------------------------------------------#
 
 env()
+
+def __myfun():
+    global out
+    out = summation.exec(logic.getPlaces(os.getenv('root')))
+    
+
+def summarize(root):
+    try:
+        t = Thread(target=__myfun, daemon=True)
+        t.start()
+        loading = tk.Toplevel(root)
+        loading.title('Running Process')
+        # loading.overrideredirect(1)
+        loading.wm_attributes()
+        loading.wm_attributes('-disabled', True)
+        # loading.wm_attributes("-alpha", 0.9)
+        loading.wm_geometry('200x70')
+        root.eval(f'tk::PlaceWindow {str(loading)} center')
+
+        loading_lab = wdg.EntryName(loading, text='\nProceso en ejecución...\n\nPor favor espere.\n')
+        loading_lab.pack(fill='both')
+        loading.focus_force()
+        while t.is_alive():
+            root.update()
+        # out = summation.exec(logic.getPlaces(os.getenv('root')))
+    except AttributeError as e:
+        ms.showerror(title="Format Error", message=e)
+    except:
+        ms.showerror(title='Unknown Error', message="Has occured an error")
+    else:
+        loading.destroy()
+        text = f"Archivo {out['filename']} creado en {out['filedir']} con {out['nrecs']} registros."
+        ms.showinfo(title="Tarea Finalizada", message=text)
 
 
 def _getSep(inpSep=None, sep=None):
