@@ -17,10 +17,10 @@ from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
 # Module importation to exec file creation and distribution
-from . import scrappers as scr
+# from . import scrappers as scr
 
 # Module importation to be developing
-# import scrappers as scr
+import scrappers as scr
 #--------------------------------------------------------------#
 
 
@@ -110,15 +110,28 @@ class H3Array:
 
     def __init__(self, url):
         DailyArray.__init__(self, url)
+    
+    def rain(self, url):
+        data = scr.H1ForeCast(url)
+        data.predict()
+        i = 0
+        for _ in range(8):
+            s = 0
+            probaRange = data.proba[i:i+3]
+            for val in data.mm[i:i+3]:
+                s += val
+                i += 1
+            yield s,max(probaRange)
 
     def firstDay(self, url, dataframe=True):
         try:
             data = scr.H3ForeCast(url)
-            data.predict()
+            data.predict()            
         except:
             raise ExecError("Prediction has not been executed")
         else:
-            content = {"Temp": data.temp, "TermSens": data.tempF,
+            rainInfo = [t for t in self.rain(url)]
+            content = {"%": [v[1] for v in rainInfo], "mm": [v[0] for v in rainInfo],"Temp": data.temp, "TermSens": data.tempF,
                        "WSpeed_Min": data.windS["min"], "WSpeed_Max": data.windS["max"],
                        "WDir": data.windD}
 
@@ -192,5 +205,6 @@ if __name__=='__main__':
     import os
     from dotenv import load_dotenv as env
     env()
-    ini = Brief(os.getenv('starturl'))
-    print(ini.genArray(os.getenv('starturl')))
+    ini = H3Array(os.getenv('starturl'))
+    print(ini.firstDay(os.getenv('starturl')))
+    
