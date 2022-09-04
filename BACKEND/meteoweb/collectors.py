@@ -16,10 +16,10 @@ import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
-## Module importation to exec file creation
+# Module importation to exec file creation and distribution
 from . import scrappers as scr
 
-## Module importation to be developing
+# Module importation to be developing
 # import scrappers as scr
 #--------------------------------------------------------------#
 
@@ -36,6 +36,7 @@ def _genLinks(item):
 
 ########################    Function    ########################
 
+
 def get_linked_urls(url):
     req = requests.get(url)
     soup = BeautifulSoup(req.content, 'html.parser')
@@ -48,13 +49,12 @@ def get_linked_urls(url):
 #--------------------------------------------------------------#
 
 
-
 class DailyArray:
 
     def __init__(self, url):
         self.url = url
         self.urls = get_linked_urls(self.url)
-    
+
     def __genDailyrow(self, url, lastday=False):
         try:
             if lastday:
@@ -66,11 +66,11 @@ class DailyArray:
             dfr = [None for _ in range(9)]
         else:
             dfr = [data.date, data.temp[0], data.temp[1],
-                data.wind[0], data.wind[1], data.precip[0],
-                data.precip[1], data.sun, data.prev]
+                   data.wind[0], data.wind[1], data.precip[0],
+                   data.precip[1], data.sun, data.prev]
         finally:
             return dfr
-    
+
     def today(self, url, last=False):
         firstlink = url
         first = self.__genDailyrow(firstlink, last)
@@ -94,7 +94,7 @@ class DailyArray:
         fullcontent = self.sixFirstDays()
         lastday = self.lastDay()
         fullcontent.append(lastday)
-        
+
         if dataframe:
             outcome = pd.DataFrame(data=fullcontent, columns=[
                 "Date", "Tmin(°C)", "Tmax(°C)",
@@ -102,15 +102,15 @@ class DailyArray:
                 "Pmax(mm)", "Sun(hrs)", "Prev"])
         else:
             outcome = fullcontent
-        
+
         return outcome
 
 
 class H3Array:
-    
+
     def __init__(self, url):
         DailyArray.__init__(self, url)
-    
+
     def firstDay(self, url, dataframe=True):
         try:
             data = scr.H3ForeCast(url)
@@ -119,14 +119,16 @@ class H3Array:
             raise ExecError("Prediction has not been executed")
         else:
             content = {"Temp": data.temp, "TermSens": data.tempF,
-                    "WSpeed_Min": data.windS["min"], "WSpeed_Max": data.windS["max"],
-                    "WDir": data.windD}
-            
-            if dataframe: outcome = pd.DataFrame(content)
-            else: outcome = content
-            
+                       "WSpeed_Min": data.windS["min"], "WSpeed_Max": data.windS["max"],
+                       "WDir": data.windD}
+
+            if dataframe:
+                outcome = pd.DataFrame(content)
+            else:
+                outcome = content
+
             return outcome
-    
+
     def genArray(self):
         dflist = []
         for url in self.urls:
@@ -136,10 +138,10 @@ class H3Array:
 
 
 class H1Array(H3Array):
-    
+
     def __init__(self, url):
         super().__init__(url)
-    
+
     def firstDay(self, url, dataframe=True):
         try:
             data = scr.H1ForeCast(url)
@@ -147,34 +149,35 @@ class H1Array(H3Array):
         except:
             raise ExecError("Prediction has not been executed")
         else:
-            content = {"Probability(%)":data.proba, "Precipitation(mm)":data.mm}
-            
+            content = {"Probability(%)": data.proba,
+                       "Precipitation(mm)": data.mm}
+
             if dataframe:
                 outcome = pd.DataFrame(content)
             else:
                 outcome = content
-            
+
             return outcome
 
 
 class Brief(DailyArray):
-    
+
     def __init__(self, url):
         DailyArray.__init__(self, url)
-    
-    def baseArray(self, url, last):
+
+    def baseArray(self, url, last=False):
         supdata = DailyArray.today(self, url, last)
         data = supdata[1:5]
         data.append(supdata[0])
         return data
-    
+
     def precipitation(self, url):
         df = H1Array.firstDay(self, url)
         percent = df["Probability(%)"].max()
         accumrain = df["Precipitation(mm)"].sum()
         pair = [percent, accumrain]
         return pair
-    
+
     def genArray(self, url, last=False):
         with ThreadPoolExecutor(max_workers=2) as exec:
             pdata = exec.submit(self.precipitation, url).result()
