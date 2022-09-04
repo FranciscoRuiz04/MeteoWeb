@@ -33,6 +33,8 @@ class Daily4cast:
     self._class -> str type object with the tag class name used as
     reference to get the master content where is the predictions.\n
     self.tag -> bs4.element type object with the master content.\n
+    self.coords -> Geographic coordinates. A list object type is the
+    outcome with the format [lat, lon, elev].\n
 
     IMPORTANT:\n
     To get the attributes self.date, self.temp, self.wind, self.precip,
