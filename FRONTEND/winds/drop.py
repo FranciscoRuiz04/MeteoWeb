@@ -11,15 +11,17 @@ __status__ = "Developer"
 ######################       Packages    ##########################
 
 import tkinter as tk
+import sys, os
 #-----------------------    GPS Pckgs    ----------------------#
 
 ## Module importation to exec file creation
-from FRONTEND import widgets as wdg
-from FRONTEND import commands
+# from FRONTEND import widgets as wdg
+# from FRONTEND import commands
 
-## Module importation to be developing
-# import widgets as wdg
-# import commands
+## Module importation to be developing and distribution
+sys.path.append(os.getenv('BACKENDMods'))
+import widgets as wdg
+import commands
 #--------------------------------------------------------------#
 
 

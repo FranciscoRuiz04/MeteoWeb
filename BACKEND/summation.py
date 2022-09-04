@@ -13,7 +13,7 @@ import pandas as pd
 # import os
 #-----------------------    GPS Pckgs    ----------------------#
 
-## Module importation to exec file creation
+## Module importation to exec file creation and distribution
 from BACKEND.meteoweb import creators
 
 ## Module importation to be developing

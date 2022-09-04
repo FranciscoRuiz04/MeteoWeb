@@ -18,14 +18,14 @@ sys.path.append(os.getenv('BACKENDMods'))
 sys.path.append(os.getenv('FRONTENDMods'))
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation
-from FRONTEND.winds import main, drop, fromfile, newrecord
-from FRONTEND import widgets as wdg
-from FRONTEND import commands
+# from FRONTEND.winds import main, drop, fromfile, newrecord
+# from FRONTEND import widgets as wdg
+# from FRONTEND import commands
 
-## Module importation to be developing
-# from winds import main, drop, fromfile, newrecord
-# import widgets as wdg
-# import commands
+# Module importation to be developing and distribution
+from winds import main, drop, fromfile, newrecord
+import widgets as wdg
+import commands
 #--------------------------------------------------------------#
 
 
