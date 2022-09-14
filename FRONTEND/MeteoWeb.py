@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -14,8 +14,7 @@ import tkinter as tk
 import os, sys
 from dotenv import load_dotenv as env
 env()
-sys.path.append(os.getenv('BACKENDMods'))
-sys.path.append(os.getenv('FRONTENDMods'))
+
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation
 # from FRONTEND.winds import main, drop, fromfile, newrecord
@@ -23,6 +22,8 @@ sys.path.append(os.getenv('FRONTENDMods'))
 # from FRONTEND import commands
 
 # Module importation to be developing and distribution
+sys.path.append(os.getenv('BACKENDMods'))
+sys.path.append(os.getenv('FRONTENDMods'))
 from winds import main, dropping, fromfile, newrecord
 import widgets as wdg
 import commands
