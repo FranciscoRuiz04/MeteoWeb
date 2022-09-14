@@ -19,15 +19,21 @@ import tkinter as tk
 sys.path[0] = sys.path[0][:-8]
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation
-# from . import widgets as wdg
+from . import widgets as wdg
 ## Module importation to be developing and distribution
-import widgets as wdg
+# import widgets as wdg
 from BACKEND import logic
 from BACKEND import summation
 from BACKEND import main
+
+## Module importation to testing
+# import logic
+# import summation
+# import main
 #--------------------------------------------------------------#
 
 env()
+
 
 def forecast(root):
     try:
@@ -139,6 +145,26 @@ def dropCommand(inp):
             ms.showinfo(title="Exist Error", message="Has occured an error")
     else:
         ms.showerror(title="No value", message="Entry a valid value")
+
+
+def dropMassive(inp):
+    n = 0
+    for key, value in inp.items():
+        if value.get():
+            if logic.dropPlace(root=os.getenv('root'), cityname=key):
+                n += 1
+    ms.showinfo(title="Dropped", message=f"{n} records have been dropped")
+
+
+def dropWhole():
+    warn = ms.askokcancel(title='Warning', message='You are about to delete all the records from DB.\nAre you sure?')
+    if warn:
+        try:
+            logic.cleanDB(os.getenv('root'))
+        except FileExistsError:
+            ms.showerror(title='Fatal Error', message='Something was wrong. Records have not been deleted')
+        else:
+            ms.showinfo(title='Clean whole', message='All locations deleted')
 
 
 def addCommand(inurl, folder, name):
