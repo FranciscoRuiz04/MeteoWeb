@@ -23,7 +23,7 @@ sys.path.append(os.getenv('FRONTENDMods'))
 # from FRONTEND import commands
 
 # Module importation to be developing and distribution
-from winds import main, drop, fromfile, newrecord
+from winds import main, dropping, fromfile, newrecord
 import widgets as wdg
 import commands
 #--------------------------------------------------------------#
@@ -52,12 +52,18 @@ toolsmenu = wdg.MenuBar(menubar)
 menubar.add_cascade(label="Herramientas", menu=toolsmenu)
 
 options = wdg.MenuBar(toolsmenu)
-toolsmenu.add_command(label='Borrar', command=lambda: drop.drop(root))
 options.add_command(label="Desde Archivo",
                     command=lambda: fromfile.importwind(root))
 options.add_command(label='Manual', command=lambda: newrecord.new(root))
 toolsmenu.add_cascade(label='Nuevo', menu=options)
+
+dropOpts = wdg.MenuBar(toolsmenu)
+toolsmenu.add_cascade(label='Borrar', menu=dropOpts)
+dropOpts.add_command(label='Por Selección', command=lambda: dropping.dropping(root))
+dropOpts.add_command(label='Todo', command=commands.dropWhole)
+
 toolsmenu.add_separator()
+
 
 statOpts = wdg.MenuBar(toolsmenu)
 statOpts.add_command(label='Pronóstico', command=lambda: commands.forecast(root))
