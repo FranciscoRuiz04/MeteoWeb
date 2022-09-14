@@ -95,6 +95,16 @@ def dropPlace(root, cityname):
     return n
 
 
+def cleanDB(root):
+    """
+    Delete all objects within program DB; that is,
+    the JSON file.
+    """
+    
+    with open(root, 'w') as file:
+        json.dump([], file, indent=4)
+
+
 def attsFromFile(pathfile, sep, headers, cloc=None, encod=None):
     """
     Generator to get a dictionary type object with the attributes from a csv
@@ -142,6 +152,3 @@ def attsFromFile(pathfile, sep, headers, cloc=None, encod=None):
 #--------------------------------------------------------------#
 
 
-if __name__ == '__main__':
-    newPlace(url=os.getenv('starturl'), root=os.getenv(
-        'root'), targetpath=os.getenv('testdir'), cityname='sma')
