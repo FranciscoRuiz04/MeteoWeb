@@ -10,7 +10,7 @@ __status__ = "Developer"
 
 ########################    Packages    ########################
 import pandas as pd
-# import os
+import os
 #-----------------------    GPS Pckgs    ----------------------#
 
 ## Module importation to exec file creation and distribution
@@ -20,7 +20,7 @@ from BACKEND.meteoweb import creators
 # from meteoweb import creators
 #--------------------------------------------------------------#
 
-def exec(gen):
+def exec(gen, targetpath):
     df = pd.DataFrame(columns=["Loc", "%", "mm", "°C_min",
                                    "°C_max", "km/h", "WindDir",
                                    "Date"])
@@ -30,9 +30,9 @@ def exec(gen):
         for rec in objClass.FormatRecords():
             df.loc[len(df)] = rec
             numrecs += 1
-    objClass.FilePath()
-    df.to_csv(objClass.filepath, encoding='utf-8',index_label='ID')
-    return {"nrecs":numrecs, "filedir":objClass.filedir, "filename":objClass.filename}
+    targetpath += os.sep + 'Concentrado.txt'
+    df.to_csv(targetpath, encoding='utf-8',index_label='ID')
+    return {"nrecs":numrecs, "filedir":os.path.dirname(targetpath), "filename":os.path.basename(targetpath)}
 
 #--------------------------------------------------------------#
 

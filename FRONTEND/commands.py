@@ -21,10 +21,13 @@ sys.path[0] = sys.path[0][:-8]
 ## Module importation to exec file creation
 # from . import widgets as wdg
 ## Module importation to be developing and distribution
-import widgets as wdg
+# import widgets as wdg
+
 from BACKEND import logic
 from BACKEND import summation
 from BACKEND import main
+
+from FRONTEND import widgets as wdg
 
 ## Module importation to testing
 # import logic
@@ -64,14 +67,13 @@ def forecast(root):
         ms.showinfo(title="Tarea Finalizada", message=text)
 
 
-def __myfun():
+def __myfun(targetpath):
     global out
-    out = summation.exec(logic.getPlaces(os.getenv('root')))
+    out = summation.exec(logic.getPlaces(os.getenv('root')), targetpath)
 
-
-def summarize(root):
+def summarize(root, targetpath):
     try:
-        t = Thread(target=__myfun, daemon=True)
+        t = Thread(target=lambda: __myfun(targetpath), daemon=True)
         t.start()
         loading = tk.Toplevel(root)
         loading.title('Running Process')
@@ -80,7 +82,7 @@ def summarize(root):
         loading.wm_attributes('-disabled', True)
         # loading.wm_attributes("-alpha", 0.9)
         loading.wm_geometry('200x70')
-        root.eval(f'tk::PlaceWindow {str(loading)} center')
+        # root.eval(f'tk::PlaceWindow {str(loading)} center')
 
         loading_lab = wdg.EntryName(loading, text='\nProceso en ejecución...\n\nPor favor espere.\n')
         loading_lab.pack(fill='both')
@@ -96,6 +98,7 @@ def summarize(root):
         loading.destroy()
         text = f"Archivo {out['filename']} creado en {out['filedir']} con {out['nrecs']} registros."
         ms.showinfo(title="Tarea Finalizada", message=text)
+
 
 
 def _getSep(inpSep=None, sep=None):
@@ -195,5 +198,5 @@ def brief():
         url = i["url"].split('.com')[-1]
         yield [i["city"], i["path"], url]
 
-if __name__=='__main__':
-    print(masiveAddCommand(os.getenv('filetest'), os.getenv('absdir'), [0,1,0], None, '', False, [1,2]))
+# if __name__=='__main__':
+#     print(masiveAddCommand(os.getenv('filetest'), os.getenv('absdir'), [0,1,0], None, '', False, [1,2]))
