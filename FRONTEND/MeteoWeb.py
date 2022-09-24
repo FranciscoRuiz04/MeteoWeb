@@ -17,14 +17,14 @@ env()
 
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation
-# from FRONTEND.winds import main, drop, fromfile, newrecord
+# from FRONTEND.winds import main, dropping, fromfile, newrecord
 # from FRONTEND import widgets as wdg
 # from FRONTEND import commands
 
 # Module importation to be developing and distribution
 sys.path.append(os.getenv('BACKENDMods'))
 sys.path.append(os.getenv('FRONTENDMods'))
-from winds import main, dropping, fromfile, newrecord
+from winds import main, dropping, fromfile, newrecord, summationwind
 import widgets as wdg
 import commands
 #--------------------------------------------------------------#
@@ -68,7 +68,7 @@ toolsmenu.add_separator()
 
 statOpts = wdg.MenuBar(toolsmenu)
 statOpts.add_command(label='Pronóstico', command=lambda: commands.forecast(root))
-statOpts.add_command(label='Resumen', command=lambda:commands.summarize(root))
+statOpts.add_command(label='Resumen', command=lambda:summationwind.importwind(root))
 toolsmenu.add_cascade(label='Generar', menu=statOpts)
 
 helpmenu = wdg.MenuBar(menubar)
