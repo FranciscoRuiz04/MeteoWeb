@@ -97,9 +97,13 @@ class Daily4cast:
         """
 
         patTag = self.tag.find(class_='wind')
-        speed = patTag.text.strip()[:-5]
+        value = patTag.text.strip()
+        if '-' in value:
+            speed = value
+        else:
+            speed = int(value[:-5])
         direction = patTag.span['class'][-1]
-        self.wind = (int(speed), direction)
+        self.wind = (speed, direction)
         return self.wind
 
     def precip_fun(self):
@@ -491,6 +495,26 @@ class H1ForeCast:
         self.probability()
 
 
+class ForeteenCast:
+    def __init__(self, url):
+        Daily4cast.__init__(self, url, className="icon-14-day")
+        url14 = self.tag.get('href')
+        self.url14 = os.getenv('mainurl') + url14
+    
+    def wrap(self):
+        try:
+            _req = requests.get(self.url14)
+        except:
+            raise Exception("Request failed!")
+        else:
+            cNames = ['dateline']
+            _soup = BeautifulSoup(_req.content, 'html.parser')
+            for c in cNames:
+                outcome = _soup.findall(class_=c)
+                pass
+
+
+
 if __name__ == '__main__':
     import os
     from dotenv import load_dotenv as env
@@ -498,14 +522,4 @@ if __name__ == '__main__':
     
     ini = Daily4cast(os.getenv('starturl'))
     ini.predict()
-    # print(ini.probability())
-    
-    # # ini.predict()
-    # print(type(ini.temp))
-    # for text in ini.info():
-    #     print(text, end='\n\n')
-    # ini.predict()
-    # print(ini.proba, ini.mm)
-    # print(ini.probability(), ini.millimeters(), sep='\n')
-    # ini.predict()
-    # print(ini.windS)
+    print(ini.precip, ini.date, ini.temp)
