@@ -11,6 +11,7 @@ __status__ = "Developer"
 
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime as dt
 #--------------------------------------------------------------#
 
 
@@ -496,6 +497,32 @@ class H1ForeCast:
 
 
 class ForeteenCast:
+    
+    """
+
+    Webscrapper to get information from meteoblue portal about the
+    weather forecast for the current day and the next 14 days. Parameters
+    like min and max temperatures, min and max precipitation and forecast
+    date are possible to get.
+
+
+    Class object has the next initial attributes:\n
+
+    self.url -> str type object with URL direction from which will be
+    done the initial scrapping.\n
+    self._class -> str type object with the tag class name used as
+    reference to get the master content where is the predictions.\n
+    self.tag -> bs4.element type object with the master content.\n
+    self.coords -> Geographic coordinates. A list object type is the
+    outcome with the format [lat, lon, elev].\n
+
+    IMPORTANT:\n
+    To get the attributes self.date and self.temp is necessary to run
+    either the functions date_fun() or tmp() respectively
+    one by one or solely to predict() function.
+
+    """
+    
     def __init__(self, url):
         Daily4cast.__init__(self, url, className="icon-14-day")
         url14 = self.tag.get('href')
@@ -521,24 +548,38 @@ class ForeteenCast:
 
     @forteen_scrap
     def date_fun(self, data=True):
+        """
+        Get dates from 'dateline' tag.
+        Outcome format is as follows: YYYY-MM-DD
+        String type outcome
+        """
+        year = dt.today().strftime('%Y')
         week = data['dateline'][:5]
         week.extend(data['temp-max'][4:6])
         week.extend(data['dateline'][5:10])
         week.extend(data['temp-max'][6:8])
-        self.date = week
+        outcome = [dt.strptime(day + '/' + year, '%d/%m/%Y') for day in week]
+        self.date = outcome
         
         return self.date
     
     @forteen_scrap
-    def temp(self, data=True):
-        t_max = [val for val in data['temp-max'] if '°' in val]
-        t_min = [val for val in data['temp-min']]
-        self.tmp = dict(min=t_min, max=t_max)
-        return self.tmp
+    def tmp(self, data=True):
+        """
+        Get the temperature range from the text within 
+        two different tags (temp-max, temp-min)
+        A dict is the outcome with the next format: {min, max}
+        Both values are integer type.
+        """
+        
+        max = [val for val in data['temp-max'] if '°' in val]
+        min = [val for val in data['temp-min']]
+        self.temp = dict(min=min, max=max)
+        return self.temp
     
     def predict(self):
         self.date_fun()
-        self.temp()
+        self.tmp()
 
 
 
@@ -549,4 +590,5 @@ if __name__ == '__main__':
     
     ini = ForeteenCast('https://www.meteoblue.com/es/tiempo/semana/celaya_m%c3%a9xico_4014875')
     ini.predict()
-    print(ini.date, ini.tmp, sep='\n\n')
+    for day in ini.date:
+        print(dt.strftime(day,'%d-%m-%Y'))
