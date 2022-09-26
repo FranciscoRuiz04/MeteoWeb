@@ -501,17 +501,44 @@ class ForeteenCast:
         url14 = self.tag.get('href')
         self.url14 = os.getenv('mainurl') + url14
     
-    def wrap(self):
-        try:
-            _req = requests.get(self.url14)
-        except:
-            raise Exception("Request failed!")
-        else:
-            cNames = ['dateline']
-            _soup = BeautifulSoup(_req.content, 'html.parser')
-            for c in cNames:
-                outcome = _soup.findall(class_=c)
-                pass
+    def forteen_scrap(function):
+        def wrap(self):
+            try:
+                _req = requests.get(self.url14)
+            except:
+                raise Exception("Request failed!")
+            else:
+                cNames = ['dateline', 'temp-max', 'temp-min']
+                values = {}
+                _soup = BeautifulSoup(_req.content, 'html.parser')
+                for c in cNames:
+                    outcome = _soup.find_all(class_=c)
+                    if c == 'dateline':
+                        outcome = outcome[10:]
+                    values[c] = [value.text.replace('.','/') for value in outcome]
+                return function(self, values)
+        return wrap
+
+    @forteen_scrap
+    def date_fun(self, data=True):
+        week = data['dateline'][:5]
+        week.extend(data['temp-max'][4:6])
+        week.extend(data['dateline'][5:10])
+        week.extend(data['temp-max'][6:8])
+        self.date = week
+        
+        return self.date
+    
+    @forteen_scrap
+    def temp(self, data=True):
+        t_max = [val for val in data['temp-max'] if '°' in val]
+        t_min = [val for val in data['temp-min']]
+        self.tmp = dict(min=t_min, max=t_max)
+        return self.tmp
+    
+    def predict(self):
+        self.date_fun()
+        self.temp()
 
 
 
@@ -520,6 +547,6 @@ if __name__ == '__main__':
     from dotenv import load_dotenv as env
     env()
     
-    ini = Daily4cast(os.getenv('starturl'))
+    ini = ForeteenCast('https://www.meteoblue.com/es/tiempo/semana/celaya_m%c3%a9xico_4014875')
     ini.predict()
-    print(ini.precip, ini.date, ini.temp)
+    print(ini.date, ini.tmp, sep='\n\n')
