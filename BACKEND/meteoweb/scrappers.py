@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.2"
+__version__ = "2.0.0"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -55,14 +55,12 @@ class Daily4cast:
         else:
             _soup = BeautifulSoup(_req.content, 'html.parser')
             self.tag = _soup.find(class_=self._class)
-            
+
             # Get geographic coordinates
             lat = _soup.find('meta', itemprop='latitude').get('content')
             lon = _soup.find('meta', itemprop='longitude').get('content')
             elev = _soup.find('meta', itemprop='elevation').get('content')
             self.coords = list(map(float, [lat, lon, elev]))
-            
-            
 
     def date_fun(self):
         """
@@ -497,7 +495,7 @@ class H1ForeCast:
 
 
 class ForeteenCast:
-    
+
     """
 
     Webscrapper to get information from meteoblue portal about the
@@ -522,48 +520,55 @@ class ForeteenCast:
     one by one or solely to predict() function.
 
     """
-    
+
     def __init__(self, url):
         Daily4cast.__init__(self, url, className="icon-14-day")
         url14 = self.tag.get('href')
         self.url14 = os.getenv('mainurl') + url14
-    
-    def forteen_scrap(function):
+        try:
+            _req = requests.get(self.url14)
+        except:
+            raise Exception("Request failed!")
+        else:
+            self._soup = BeautifulSoup(_req.content, 'html.parser')
+
+    def __forteen_scrap(function):
         def wrap(self):
-            try:
-                _req = requests.get(self.url14)
-            except:
-                raise Exception("Request failed!")
-            else:
-                cNames = ['dateline', 'temp-max', 'temp-min']
-                values = {}
-                _soup = BeautifulSoup(_req.content, 'html.parser')
-                for c in cNames:
-                    outcome = _soup.find_all(class_=c)
-                    if c == 'dateline':
-                        outcome = outcome[10:]
-                    values[c] = [value.text.replace('.','/') for value in outcome]
-                return function(self, values)
+            cNames = ['dateline', 'temp-max', 'temp-min']
+            values = {}
+            for c in cNames:
+                outcome = self._soup.find_all(class_=c)
+                if c == 'dateline':
+                    outcome = outcome[10:]
+                values[c] = [value.text for value in outcome]
+            return function(self, values)
         return wrap
 
-    @forteen_scrap
+    @__forteen_scrap
     def date_fun(self, data=True):
         """
         Get dates from 'dateline' tag.
-        Outcome format is as follows: YYYY-MM-DD
-        String type outcome
+        As outcome will get a lsit with daily 
+        date as Date data type with the next
+        format:
+        dd.mm.YYYY.
         """
+
+        # Today year
         year = dt.today().strftime('%Y')
-        week = data['dateline'][:5]
-        week.extend(data['temp-max'][4:6])
-        week.extend(data['dateline'][5:10])
-        week.extend(data['temp-max'][6:8])
-        outcome = [dt.strptime(day + '/' + year, '%d/%m/%Y') for day in week]
+
+        # Date data extraction
+        dateTag = data['dateline'][:10]
+        maxTag = data['temp-max'][4:8]
+
+        # To date format data type
+        week = sorted(dateTag + maxTag, key=lambda x: float(x))
+        outcome = [dt.strptime(day + '.' + year, '%d.%m.%Y') for day in week]
         self.date = outcome
-        
+
         return self.date
-    
-    @forteen_scrap
+
+    @__forteen_scrap
     def tmp(self, data=True):
         """
         Get the temperature range from the text within 
@@ -571,24 +576,57 @@ class ForeteenCast:
         A dict is the outcome with the next format: {min, max}
         Both values are integer type.
         """
-        
+
         max = [val for val in data['temp-max'] if '°' in val]
         min = [val for val in data['temp-min']]
         self.temp = dict(min=min, max=max)
         return self.temp
-    
+
+    def precipitation(self):
+        """
+        Get precipitation from "forecast-table" class name tag.
+        As outcome will get a dictionary with three keys as
+        attributes: <mm> key for rain millimeters information,
+        <mm_sd> key for rain millimeters standar desviation and
+        <proba> for rain probability percentage.
+        """
+
+        whole = self._soup.find(class_="forecast-table")
+
+        # mm rain
+        pTag = whole.find(
+            "canvas", {"id": "canvas_14_days_forecast_precipitations"})
+        mmList = pTag.get("data-precipitation")
+        sd = pTag.get("data-precipitation-spread")
+
+        # Probability rain
+        test = whole.find_all('tr')[-1]  # Fetch last row from forecast table
+        # Get text percent data
+        pStrList = (day.text.strip()[:-1]
+                    for day in test.find_all('td') if '%' in day.text)
+        pIntList = [int(num) for num in pStrList]
+
+        # Outcome formatting
+        outcome = dict(mm=mmList, mm_sd=sd, proba=pIntList)
+        self.precip = outcome
+        return self.precip
+
     def predict(self):
+        """
+        Fetch all the variables considered by the class with just
+        run this function.
+        Variables will be saved in:
+        self.date = Forecast date.
+        self.temp = Dictionary with <max> and <min> keys.
+        self.precip = Dictionary with <mm>, <mm_sd> and <proba> keys.
+        """
+
         self.date_fun()
         self.tmp()
-
+        self.precipitation()
 
 
 if __name__ == '__main__':
     import os
     from dotenv import load_dotenv as env
     env()
-    
-    ini = ForeteenCast('https://www.meteoblue.com/es/tiempo/semana/celaya_m%c3%a9xico_4014875')
-    ini.predict()
-    for day in ini.date:
-        print(dt.strftime(day,'%d-%m-%Y'))
