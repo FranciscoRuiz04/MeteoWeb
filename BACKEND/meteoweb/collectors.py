@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.1"
+__version__ = "2.0.0"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -47,6 +47,43 @@ def get_linked_urls(url):
         urls.append(link)
     return urls
 #--------------------------------------------------------------#
+
+
+class ForeteenArray:
+
+    def __init__(self, url):
+        self.url = url
+
+    def data(self):
+        try:
+            data = scr.ForeteenCast(self.url)
+            data.predict()
+        except:
+            dfr = [-999 for _ in range(15)]
+        else:
+            dfr = [data.precip['mm'], data.precip['mm_sd'], data.precip['proba'],
+                   data.temp['min'], data.temp['max'], data.date]
+        finally:
+            return dfr
+
+    def genArray(self, dataframe=True):
+        try:
+            data = scr.ForeteenCast(self.url)
+            data.predict()
+        except:
+            return None
+        else:
+            if dataframe:
+                df = pd.DataFrame()
+                df['mm'] = data.precip['mm']
+                df['sd'] = data.precip['mm_sd']
+                df['%'] = data.precip['proba']
+                df['°C_Min'] = data.temp['min']
+                df['°C_Max'] = data.temp['max']
+                df['Date'] = data.date
+            else:
+                df = self.data()
+            return df
 
 
 class DailyArray:
@@ -110,7 +147,7 @@ class H3Array:
 
     def __init__(self, url):
         DailyArray.__init__(self, url)
-    
+
     def rain(self, url):
         data = scr.H1ForeCast(url)
         data.predict()
@@ -121,17 +158,17 @@ class H3Array:
             for val in data.mm[i:i+3]:
                 s += val
                 i += 1
-            yield s,max(probaRange)
+            yield s, max(probaRange)
 
     def firstDay(self, url, dataframe=True):
         try:
             data = scr.H3ForeCast(url)
-            data.predict()            
+            data.predict()
         except:
             raise ExecError("Prediction has not been executed")
         else:
             rainInfo = [t for t in self.rain(url)]
-            content = {"%": [v[1] for v in rainInfo], "mm": [v[0] for v in rainInfo],"Temp": data.temp, "TermSens": data.tempF,
+            content = {"%": [v[1] for v in rainInfo], "mm": [v[0] for v in rainInfo], "Temp": data.temp, "TermSens": data.tempF,
                        "WSpeed_Min": data.windS["min"], "WSpeed_Max": data.windS["max"],
                        "WDir": data.windD}
 
@@ -199,12 +236,9 @@ class Brief(DailyArray):
         return fulldata
 
 
-
-
-if __name__=='__main__':
+if __name__ == '__main__':
     import os
     from dotenv import load_dotenv as env
     env()
-    ini = H3Array(os.getenv('starturl'))
-    print(ini.firstDay(os.getenv('starturl')))
-    
+    ini = ForeteenArray(os.getenv('starturl'))
+    print(ini.genArray())
