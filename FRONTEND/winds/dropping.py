@@ -24,7 +24,6 @@ import sys, os
 ## Module importation to be developing and distribution
 sys.path.append(os.getenv('BACKENDMods'))
 sys.path.append(os.getenv('FRONTENDMods'))
-
 import widgets as wdg
 import commands
 
