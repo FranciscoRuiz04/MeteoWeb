@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.1"
+__version__ = "2.0.0"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -53,9 +53,14 @@ class File_24H:
         self.filepath = None
 
     def Filename(self):
+        # Current Running Date
         creation = datetime.now().strftime("%d%m%y_%H%M")
+        
+        # Date name parameters
         self.day = creation.split('_')[0]
         self.time = creation.split('_')[1]
+        
+        # Full filename generation
         name = self.name + '_C' + creation
         filename = name + '.' + self.format
         self.filename = filename
@@ -82,6 +87,21 @@ class File_24H:
         else:
             if len(os.listdir(directory)) > 0 and not isredundant(df, directory):
                 df.to_csv(self.filepath, encoding='utf-8', index=False)
+
+
+class File_14Days(File_24H):
+    
+    def __init__(self, placeAtts, format, encoding):
+        super().__init__(placeAtts, format, encoding)
+    
+    def FileDir(self, mainFolderName='14Days'):
+        self.Filename()
+        folder = self.tp + os.sep + mainFolderName
+        self.filedir = folder
+    
+    def NewFile(self, obj=collectors.ForeteenArray):
+        return super().NewFile(obj)
+
 
 
 class File_3H(File_24H):
@@ -173,6 +193,7 @@ class File_Brief(File_24H):
 if __name__ == '__main__':
     from dotenv import load_dotenv as env
     env()
-    ini = File_Brief(os.getenv('json'), 'txt', 'utf-8')
-    import sys
-    print(sys.getsizeof(next(ini.FormatRecords())))
+    ini = File_14Days(os.getenv('json'), 'txt', 'utf-8')
+    ini.NewFile()
+    # import sys
+    # print(sys.getsizeof(next(ini.FormatRecords())))
