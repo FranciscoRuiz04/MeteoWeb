@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.4"
+__version__ = "2.0.0"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -67,13 +67,17 @@ toolsmenu.add_separator()
 
 
 statOpts = wdg.MenuBar(toolsmenu)
-statOpts.add_command(label='Pronóstico', command=lambda: commands.forecast(root))
-statOpts.add_command(label='Resumen', command=lambda:summationwind.importwind(root))
 toolsmenu.add_cascade(label='Generar', menu=statOpts)
+statOpts.add_command(label='Resumen', command=lambda:summationwind.importwind(root))
 
-helpmenu = wdg.MenuBar(menubar)
-helpmenu.add_command(label="Acerca de")
-menubar.add_cascade(label="Ayuda", menu=helpmenu)
+forecast = wdg.MenuBar(statOpts)
+statOpts.add_cascade(label='Pronóstico', menu=forecast)
+forecast.add_command(label='Diario', command=lambda: commands.forecast(root))
+forecast.add_command(label='14 días', command=lambda: commands.foreteenFC(root))
+
+# helpmenu = wdg.MenuBar(menubar)
+# helpmenu.add_command(label="Acerca de")
+# menubar.add_cascade(label="Ayuda", menu=helpmenu)
 
 root.config(menu=menubar)
 
