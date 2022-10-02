@@ -12,6 +12,7 @@ __status__ = "Developer"
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
+import os
 #--------------------------------------------------------------#
 
 
@@ -577,9 +578,9 @@ class ForeteenCast:
         Both values are integer type.
         """
 
-        max = [val for val in data['temp-max'] if '°' in val]
-        min = [val for val in data['temp-min']]
-        self.temp = dict(min=min, max=max)
+        max = (val for val in data['temp-max'] if '°' in val)
+        min = (val for val in data['temp-min'])
+        self.temp = dict(min=[int(val[:-1]) for val in min], max=[int(val[:-1]) for val in max])
         return self.temp
 
     def precipitation(self):
@@ -596,8 +597,11 @@ class ForeteenCast:
         # mm rain
         pTag = whole.find(
             "canvas", {"id": "canvas_14_days_forecast_precipitations"})
-        mmList = pTag.get("data-precipitation")
-        sd = pTag.get("data-precipitation-spread")
+        mmStr = pTag.get("data-precipitation").replace('[', '')[:-1].split(',')
+        sdStr = pTag.get("data-precipitation-spread").replace('[', '')[:-1].split(',')
+        
+        mmFloat = map(float, mmStr)
+        sdFloat = map(float, sdStr)
 
         # Probability rain
         test = whole.find_all('tr')[-1]  # Fetch last row from forecast table
@@ -607,7 +611,7 @@ class ForeteenCast:
         pIntList = [int(num) for num in pStrList]
 
         # Outcome formatting
-        outcome = dict(mm=mmList, mm_sd=sd, proba=pIntList)
+        outcome = dict(mm=list(mmFloat), mm_sd=list(sdFloat), proba=pIntList)
         self.precip = outcome
         return self.precip
 
@@ -630,3 +634,6 @@ if __name__ == '__main__':
     import os
     from dotenv import load_dotenv as env
     env()
+    ini = ForeteenCast(os.getenv('starturl'))
+    ini.precipitation()
+    print(ini.precip)
