@@ -40,23 +40,37 @@ class AttributesTable:
         self.__genObj = genObj(os.getenv('root'))
         self.__attObj = attObj
 
-    def attributes(self):
+    def records(self):
         for loc in self.__genObj:
             obj = self.__attObj(loc['url'])
-            attribute = obj.genArray(loc['url'])
-            yield attribute
+            record = obj.genArray(loc['url'])
+            record['Loc'] = loc['city']
+            yield record
 
-    def genTable(self):
+    def genTable(self, export=False):
         atts = pd.DataFrame()
-        for att in self.attributes():
+        for att in self.records():
             atts = atts.append(att, ignore_index=True)
         attTable = geopd.GeoDataFrame(atts,
                                       geometry=geopd.points_from_xy(atts['Lon'],
                                                                     atts['Lat'],
                                                                     atts['Elev']))
-        return attTable
+        if export:
+            attTable.to_file('C:\DailyForecast_test\muns_wgs84.shp', driver='ESRI Shapefile')
+        else:
+            return attTable
 
     def mapping(self):
         attTable = self.genTable()
         attTable.plot()
         plt.show()
+
+if __name__ == '__main__':
+    import sys
+    from dotenv import load_dotenv as env
+    env()
+    sys.path.append(os.getenv('BACKENDMods'))
+    import logic
+    
+    ini = AttributesTable(attObj=Attribute, genObj=logic.getPlaces)
+    ini.genTable(True)
