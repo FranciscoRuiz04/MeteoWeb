@@ -6,12 +6,12 @@ import pandas as pd
 import os
 #-----------------------    GPS Pckgs    ----------------------#
 # Module importation to exec file creation
-from . import collectors
-from . import scrappers as scr
+# from . import collectors
+# from . import scrappers as scr
 
 # Module importation to be developing
-# import scrappers as scr
-# import collectors
+import scrappers as scr
+import collectors
 #--------------------------------------------------------------#
 
 

@@ -17,15 +17,15 @@ import tkinter as tk
 # env()
 
 ## Module importation to exec file creation
-from FRONTEND import widgets as wdg
-from FRONTEND import commands
+# from FRONTEND import widgets as wdg
+# from FRONTEND import commands
 
 ## Module importation to be developing and distribution
-# import sys, os
-# sys.path.append(os.getenv('BACKENDMods'))
-# sys.path.append(os.getenv('FRONTENDMods'))
-# import widgets as wdg
-# import commands
+import sys, os
+sys.path.append(os.getenv('BACKENDMods'))
+sys.path.append(os.getenv('FRONTENDMods'))
+import widgets as wdg
+import commands
 
 def dropping(root):
     root = tk.Toplevel(root)

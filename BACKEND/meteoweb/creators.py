@@ -14,10 +14,10 @@ import os
 import pandas as pd
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation and distribution
-from . import collectors
+# from . import collectors
 
 ## Module importation to be developing
-# import collectors
+import collectors
 #--------------------------------------------------------------#
 
 
