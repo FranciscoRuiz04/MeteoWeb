@@ -19,16 +19,16 @@ import tkinter as tk
 sys.path[0] = sys.path[0][:-8]
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation
-# from . import widgets as wdg
-# from BACKEND import logic
-# from BACKEND import summation
-# from BACKEND import main
-
-## Module importation to distribution
-import widgets as wdg
+from . import widgets as wdg
 from BACKEND import logic
 from BACKEND import summation
 from BACKEND import main
+
+## Module importation to distribution
+# import widgets as wdg
+# from BACKEND import logic
+# from BACKEND import summation
+# from BACKEND import main
 
 # Module importation to develop
 # from BACKEND import logic
