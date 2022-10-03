@@ -13,17 +13,17 @@ from tkinter import LEFT, RIGHT, ttk
 
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation and distribution
-from FRONTEND import commands
-from FRONTEND import widgets as wdg
+# from FRONTEND import commands
+# from FRONTEND import widgets as wdg
 
 ## Module importation to be developing
-# try:
-#     import widgets as wdg
-# except ModuleNotFoundError:
-#     import sys
-#     sys.path.append(r'C:\CODES\MeteoWeb\FRONTEND')
-#     import widgets as wdg
-# import commands
+try:
+    import widgets as wdg
+except ModuleNotFoundError:
+    import sys
+    sys.path.append(r'C:\CODES\MeteoWeb\FRONTEND')
+    import widgets as wdg
+import commands
 #--------------------------------------------------------------#
 def win(root):
     # Root window
