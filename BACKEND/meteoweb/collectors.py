@@ -17,10 +17,10 @@ from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
 # Module importation to exec file creation and distribution
-# from . import scrappers as scr
+from . import scrappers as scr
 
 # Module importation to be developing
-from . import scrappers as scr
+# from . import scrappers as scr
 #--------------------------------------------------------------#
 
 
