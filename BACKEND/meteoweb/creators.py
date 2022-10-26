@@ -43,12 +43,11 @@ def isredundant(dfObj, pathfolder):
 
 class File_24H:
 
-    def __init__(self, placeAtts, format, encoding):
+    def __init__(self, placeAtts, format):
         self.tp = placeAtts["path"]
         self.url = placeAtts["url"]
         self.name = placeAtts["city"]
         self.format = format
-        self.encod = encoding
         self.filename = None
         self.filepath = None
 
@@ -91,8 +90,8 @@ class File_24H:
 
 class File_14Days(File_24H):
     
-    def __init__(self, placeAtts, format, encoding):
-        super().__init__(placeAtts, format, encoding)
+    def __init__(self, placeAtts, format):
+        super().__init__(placeAtts, format)
     
     def FileDir(self, mainFolderName='14Days'):
         self.Filename()
@@ -106,8 +105,8 @@ class File_14Days(File_24H):
 
 class File_3H(File_24H):
 
-    def __init__(self, placeAtts, format, encoding):
-        super().__init__(placeAtts, format, encoding)
+    def __init__(self, placeAtts, format):
+        super().__init__(placeAtts, format)
 
     def Filenames(self):
         super().Filename()
@@ -148,8 +147,8 @@ class File_3H(File_24H):
 
 class File_1H(File_3H):
 
-    def __init__(self, placeAtts, format, encoding):
-        super().__init__(placeAtts, format, encoding)
+    def __init__(self, placeAtts, format):
+        super().__init__(placeAtts, format)
 
     def FileDir(self, mainFolderName='1H'):
         super().FileDir(mainFolderName)
@@ -160,8 +159,8 @@ class File_1H(File_3H):
 
 class File_Brief(File_24H):
 
-    def __init__(self, placeAtts, format, encoding):
-        super().__init__(placeAtts, format, encoding)
+    def __init__(self, placeAtts, format):
+        super().__init__(placeAtts, format)
 
     def Filename(self):
         creation = datetime.now().strftime("%d%m%y_%H%M")
@@ -171,12 +170,12 @@ class File_Brief(File_24H):
         filename = name + '.' + self.format
         self.filename = filename
 
-    def FileDir(self, mainFolderName='Summations'):
-        self.Filename()
-        childfolder = self.tp.split(os.sep)
-        self.filedir = os.sep.join(childfolder[:-1]) + os.sep + mainFolderName
-        if not os.path.exists(self.filedir):
-            os.makedirs(self.filedir)
+    # def FileDir(self, mainFolderName='Summations'):
+    #     self.Filename()
+    #     childfolder = self.tp.split(os.sep)
+    #     self.filedir = os.sep.join(childfolder[:-1]) + os.sep + mainFolderName
+    #     if not os.path.exists(self.filedir):
+    #         os.makedirs(self.filedir)
     
     def FormatRecords(self):
         collector = collectors.Brief(self.url)
@@ -186,6 +185,19 @@ class File_Brief(File_24H):
             meteoData = collector.genArray(url, last)
             meteoData.insert(0, self.name)
             yield meteoData
+
+
+
+class File_Brief14(File_Brief):
+    
+    def __init__(self, placeAtts, format, encoding):
+        super().__init__(placeAtts, format, encoding)
+    
+    def FormatRecords(self):
+        dfByPlace = collectors.Brief14(self.url)
+        out = dfByPlace.genArray()
+        out['Loc'] = [self.name]*14
+        return dfByPlace.genArray()
 #--------------------------------------------------------------#
 
 

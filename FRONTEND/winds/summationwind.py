@@ -17,7 +17,7 @@ from FRONTEND import commands, widgets as wdg
 #--------------------------------------------------------------#
 
 
-def importwind(rootmain):
+def importwind(rootmain, daily):
     # Root window
     root = tk.Toplevel(rootmain)
     root.geometry('450x125')
@@ -42,5 +42,5 @@ def importwind(rootmain):
     b1.grid(row=1, column=2, padx=10)
     
     sendBtm = wdg.Button(root, 'Listo',
-                         lambda: commands.summarize(root, pathfile.get()))
+                         lambda: commands.summarize(root, pathfile.get(), daily))
     sendBtm.pack()

@@ -101,13 +101,16 @@ def foreteenFC(root):
         text = f"Pronóstico Generado"
         ms.showinfo(title="Tarea Finalizada", message=text)
 
-def __myfun(targetpath):
+def __myfun(targetpath, daily=True):
     global out
-    out = summation.exec(logic.getPlaces(os.getenv('root')), targetpath)
+    if daily:
+        out = summation.exec(logic.getPlaces(os.getenv('root')), targetpath)
+    else:
+        out = summation.exec14(logic.getPlaces(os.getenv('root')), targetpath)
 
-def summarize(root, targetpath):
+def summarize(root, targetpath, daily):
     try:
-        t = Thread(target=lambda: __myfun(targetpath), daemon=True)
+        t = Thread(target=lambda: __myfun(targetpath, daily), daemon=True)
         t.start()
         loading = tk.Toplevel(root)
         loading.title('Running Process')
