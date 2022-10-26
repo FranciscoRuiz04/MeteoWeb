@@ -43,13 +43,14 @@ def isredundant(dfObj, pathfolder):
 
 class File_24H:
 
-    def __init__(self, placeAtts, format):
+    def __init__(self, placeAtts, format, encoding):
         self.tp = placeAtts["path"]
         self.url = placeAtts["url"]
         self.name = placeAtts["city"]
         self.format = format
         self.filename = None
         self.filepath = None
+        self.encod = encoding
 
     def Filename(self):
         # Current Running Date
@@ -90,8 +91,8 @@ class File_24H:
 
 class File_14Days(File_24H):
     
-    def __init__(self, placeAtts, format):
-        super().__init__(placeAtts, format)
+    def __init__(self, placeAtts, format, encoding):
+        super().__init__(placeAtts, format, encoding)
     
     def FileDir(self, mainFolderName='14Days'):
         self.Filename()
@@ -105,8 +106,8 @@ class File_14Days(File_24H):
 
 class File_3H(File_24H):
 
-    def __init__(self, placeAtts, format):
-        super().__init__(placeAtts, format)
+    def __init__(self, placeAtts, format, encoding):
+        super().__init__(placeAtts, format, encoding)
 
     def Filenames(self):
         super().Filename()
@@ -147,8 +148,8 @@ class File_3H(File_24H):
 
 class File_1H(File_3H):
 
-    def __init__(self, placeAtts, format):
-        super().__init__(placeAtts, format)
+    def __init__(self, placeAtts, format, encoding):
+        super().__init__(placeAtts, format, encoding)
 
     def FileDir(self, mainFolderName='1H'):
         super().FileDir(mainFolderName)
@@ -159,8 +160,8 @@ class File_1H(File_3H):
 
 class File_Brief(File_24H):
 
-    def __init__(self, placeAtts, format):
-        super().__init__(placeAtts, format)
+    def __init__(self, placeAtts, format, encoding='utf-8'):
+        super().__init__(placeAtts, format, encoding)
 
     def Filename(self):
         creation = datetime.now().strftime("%d%m%y_%H%M")
@@ -190,8 +191,8 @@ class File_Brief(File_24H):
 
 class File_Brief14(File_Brief):
     
-    def __init__(self, placeAtts, format):
-        super().__init__(placeAtts, format)
+    def __init__(self, placeAtts, format, encoding='utf-8'):
+        super().__init__(placeAtts, format, encoding)
     
     def FormatRecords(self):
         dfByPlace = collectors.Brief14(self.url)
