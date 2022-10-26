@@ -22,11 +22,12 @@ env()
 # from FRONTEND import commands
 
 # Module importation to be developing and distribution
-# sys.path.append(os.getenv('BACKENDMods'))
-# sys.path.append(os.getenv('FRONTENDMods'))
-# from winds import main, dropping, fromfile, newrecord, summationwind
-# import widgets as wdg
-# import commands
+import sys
+sys.path.append(os.getenv('BACKENDMods'))
+sys.path.append(os.getenv('FRONTENDMods'))
+from winds import main, dropping, fromfile, newrecord, summationwind
+import widgets as wdg
+import commands
 #--------------------------------------------------------------#
 
 
