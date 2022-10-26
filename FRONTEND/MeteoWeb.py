@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -11,7 +11,7 @@ __status__ = "Developer"
 ######################       Packages    ##########################
 
 import tkinter as tk
-import os, sys
+import os
 from dotenv import load_dotenv as env
 env()
 
@@ -22,11 +22,11 @@ env()
 # from FRONTEND import commands
 
 # Module importation to be developing and distribution
-sys.path.append(os.getenv('BACKENDMods'))
-sys.path.append(os.getenv('FRONTENDMods'))
-from winds import main, dropping, fromfile, newrecord, summationwind
-import widgets as wdg
-import commands
+# sys.path.append(os.getenv('BACKENDMods'))
+# sys.path.append(os.getenv('FRONTENDMods'))
+# from winds import main, dropping, fromfile, newrecord, summationwind
+# import widgets as wdg
+# import commands
 #--------------------------------------------------------------#
 
 
@@ -68,11 +68,16 @@ toolsmenu.add_separator()
 
 statOpts = wdg.MenuBar(toolsmenu)
 toolsmenu.add_cascade(label='Generar', menu=statOpts)
-statOpts.add_command(label='Resumen', command=lambda:summationwind.importwind(root))
+
+reporTool = wdg.MenuBar(statOpts)
+statOpts.add_cascade(label='Resumen', menu=reporTool)
+reporTool.add_command(label='7 días', command=lambda:summationwind.importwind(root, daily=True))
+reporTool.add_command(label='14 días', command=lambda:summationwind.importwind(root, daily=False))
+
 
 forecast = wdg.MenuBar(statOpts)
 statOpts.add_cascade(label='Pronóstico', menu=forecast)
-forecast.add_command(label='Diario', command=lambda: commands.forecast(root))
+forecast.add_command(label='7 días', command=lambda: commands.forecast(root))
 forecast.add_command(label='14 días', command=lambda: commands.foreteenFC(root))
 
 # helpmenu = wdg.MenuBar(menubar)

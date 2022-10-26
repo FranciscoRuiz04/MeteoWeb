@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -20,7 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import scrappers as scr
 
 # Module importation to be developing
-# import scrappers as scr
+# from . import scrappers as scr
 #--------------------------------------------------------------#
 
 
@@ -84,6 +84,25 @@ class ForeteenArray:
             else:
                 df = self.data()
             return df
+
+
+class Brief14(ForeteenArray):
+
+    def __init__(self, url):
+        ForeteenArray.__init__(self, url)
+
+    def genArray(self):
+        data = scr.ForeteenCast(self.url)
+        data.predict()
+
+        df = pd.DataFrame()
+        for i, day in enumerate(data.date):
+            row = {"mm": data.precip['mm'][i], "sd": data.precip['mm_sd'][i],
+                   "%": data.precip['proba'][i], "C_min": data.temp['min'][i],
+                   "C_max": data.temp['max'][i], "Date": day}
+            df = df.append(row, ignore_index=True)
+        
+        return df
 
 
 class DailyArray:

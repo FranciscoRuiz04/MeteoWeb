@@ -3,7 +3,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.2"
+__version__ = "2.0.1"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -19,7 +19,7 @@ import tkinter as tk
 sys.path[0] = sys.path[0][:-8]
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation
-from . import widgets as wdg
+import widgets as wdg
 from BACKEND import logic
 from BACKEND import summation
 from BACKEND import main
@@ -101,13 +101,16 @@ def foreteenFC(root):
         text = f"Pronóstico Generado"
         ms.showinfo(title="Tarea Finalizada", message=text)
 
-def __myfun(targetpath):
+def __myfun(targetpath, daily=True):
     global out
-    out = summation.exec(logic.getPlaces(os.getenv('root')), targetpath)
+    if daily:
+        out = summation.exec(logic.getPlaces(os.getenv('root')), targetpath)
+    else:
+        out = summation.exec14(logic.getPlaces(os.getenv('root')), targetpath)
 
-def summarize(root, targetpath):
+def summarize(root, targetpath, daily):
     try:
-        t = Thread(target=lambda: __myfun(targetpath), daemon=True)
+        t = Thread(target=lambda: __myfun(targetpath, daily), daemon=True)
         t.start()
         loading = tk.Toplevel(root)
         loading.title('Running Process')

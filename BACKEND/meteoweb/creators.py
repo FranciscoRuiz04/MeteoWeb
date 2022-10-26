@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -17,7 +17,7 @@ import pandas as pd
 from . import collectors
 
 ## Module importation to be developing
-# import collectors
+# from . import collectors
 #--------------------------------------------------------------#
 
 
@@ -48,9 +48,9 @@ class File_24H:
         self.url = placeAtts["url"]
         self.name = placeAtts["city"]
         self.format = format
-        self.encod = encoding
         self.filename = None
         self.filepath = None
+        self.encod = encoding
 
     def Filename(self):
         # Current Running Date
@@ -160,7 +160,7 @@ class File_1H(File_3H):
 
 class File_Brief(File_24H):
 
-    def __init__(self, placeAtts, format, encoding):
+    def __init__(self, placeAtts, format, encoding='utf-8'):
         super().__init__(placeAtts, format, encoding)
 
     def Filename(self):
@@ -171,12 +171,12 @@ class File_Brief(File_24H):
         filename = name + '.' + self.format
         self.filename = filename
 
-    def FileDir(self, mainFolderName='Summations'):
-        self.Filename()
-        childfolder = self.tp.split(os.sep)
-        self.filedir = os.sep.join(childfolder[:-1]) + os.sep + mainFolderName
-        if not os.path.exists(self.filedir):
-            os.makedirs(self.filedir)
+    # def FileDir(self, mainFolderName='Summations'):
+    #     self.Filename()
+    #     childfolder = self.tp.split(os.sep)
+    #     self.filedir = os.sep.join(childfolder[:-1]) + os.sep + mainFolderName
+    #     if not os.path.exists(self.filedir):
+    #         os.makedirs(self.filedir)
     
     def FormatRecords(self):
         collector = collectors.Brief(self.url)
@@ -186,6 +186,19 @@ class File_Brief(File_24H):
             meteoData = collector.genArray(url, last)
             meteoData.insert(0, self.name)
             yield meteoData
+
+
+
+class File_Brief14(File_Brief):
+    
+    def __init__(self, placeAtts, format, encoding='utf-8'):
+        super().__init__(placeAtts, format, encoding)
+    
+    def FormatRecords(self):
+        dfByPlace = collectors.Brief14(self.url)
+        out = dfByPlace.genArray()
+        out.insert(0, "Loc", [self.name]*14)
+        return out
 #--------------------------------------------------------------#
 
 
@@ -193,7 +206,7 @@ class File_Brief(File_24H):
 if __name__ == '__main__':
     from dotenv import load_dotenv as env
     env()
-    ini = File_14Days(os.getenv('json'), 'txt', 'utf-8')
-    ini.NewFile()
+    ini = File_Brief14(os.getenv('json'), 'txt')
+    print(ini.FormatRecords())
     # import sys
     # print(sys.getsizeof(next(ini.FormatRecords())))
