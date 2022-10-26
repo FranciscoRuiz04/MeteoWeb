@@ -559,12 +559,12 @@ class ForeteenCast:
         year = dt.today().strftime('%Y')
 
         # Date data extraction
-        dateTag = data['dateline'][:10]
-        maxTag = data['temp-max'][4:8]
+        dateTag = ['.'.join(reversed(value.split('.'))) for value in data['dateline'][:10]]
+        maxTag = ['.'.join(reversed(value.split('.'))) for value in data['temp-max'][4:8]]
 
         # To date format data type
         week = sorted(dateTag + maxTag, key=lambda x: float(x))
-        outcome = [dt.strptime(day + '.' + year, '%d.%m.%Y') for day in week]
+        outcome = [dt.strptime(day + '.' + year, '%m.%d.%Y') for day in week]
         self.date = outcome
 
         return self.date
@@ -635,5 +635,5 @@ if __name__ == '__main__':
     from dotenv import load_dotenv as env
     env()
     ini = ForeteenCast(os.getenv('starturl'))
-    ini.precipitation()
-    print(ini.precip)
+    ini.date_fun()
+    print(ini.date)
