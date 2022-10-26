@@ -68,11 +68,16 @@ toolsmenu.add_separator()
 
 statOpts = wdg.MenuBar(toolsmenu)
 toolsmenu.add_cascade(label='Generar', menu=statOpts)
-statOpts.add_command(label='Resumen', command=lambda:summationwind.importwind(root))
+
+reporTool = wdg.MenuBar(statOpts)
+statOpts.add_cascade(label='Resumen', menu=reporTool)
+reporTool.add_command(label='7 días', command=lambda:summationwind.importwind(root, daily=True))
+reporTool.add_command(label='14 días', command=lambda:summationwind.importwind(root, daily=False))
+
 
 forecast = wdg.MenuBar(statOpts)
 statOpts.add_cascade(label='Pronóstico', menu=forecast)
-forecast.add_command(label='Diario', command=lambda: commands.forecast(root))
+forecast.add_command(label='7 días', command=lambda: commands.forecast(root))
 forecast.add_command(label='14 días', command=lambda: commands.foreteenFC(root))
 
 # helpmenu = wdg.MenuBar(menubar)
