@@ -14,10 +14,10 @@ import os
 import pandas as pd
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation and distribution
-from . import collectors
+# import collectors
 
 ## Module importation to be developing
-# import collectors
+from . import collectors
 #--------------------------------------------------------------#
 
 
@@ -190,14 +190,14 @@ class File_Brief(File_24H):
 
 class File_Brief14(File_Brief):
     
-    def __init__(self, placeAtts, format, encoding):
-        super().__init__(placeAtts, format, encoding)
+    def __init__(self, placeAtts, format):
+        super().__init__(placeAtts, format)
     
     def FormatRecords(self):
         dfByPlace = collectors.Brief14(self.url)
         out = dfByPlace.genArray()
-        out['Loc'] = [self.name]*14
-        return dfByPlace.genArray()
+        out.insert(0, "Loc", [self.name]*14)
+        return out
 #--------------------------------------------------------------#
 
 
@@ -205,7 +205,7 @@ class File_Brief14(File_Brief):
 if __name__ == '__main__':
     from dotenv import load_dotenv as env
     env()
-    ini = File_14Days(os.getenv('json'), 'txt', 'utf-8')
-    ini.NewFile()
+    ini = File_Brief14(os.getenv('json'), 'txt')
+    print(ini.FormatRecords())
     # import sys
     # print(sys.getsizeof(next(ini.FormatRecords())))
