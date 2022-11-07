@@ -559,12 +559,13 @@ class ForeteenCast:
         year = dt.today().strftime('%Y')
 
         # Date data extraction
-        dateTag = ['.'.join(reversed(value.split('.'))) for value in data['dateline'][:10]]
-        maxTag = ['.'.join(reversed(value.split('.'))) for value in data['temp-max'][4:8]]
+        dateTag = data['dateline'][:10]
+        maxTag = data['temp-max'][4:8]
 
         # To date format data type
-        week = sorted(dateTag + maxTag, key=lambda x: float(x))
-        outcome = [dt.strptime(day + '.' + year, '%m.%d.%Y') for day in week]
+        week = dateTag + maxTag
+        outcome = [dt.strptime(day + '.' + year, '%d.%m.%Y') for day in week]
+        outcome.sort()
         self.date = outcome
 
         return self.date
