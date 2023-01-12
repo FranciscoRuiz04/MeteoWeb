@@ -41,19 +41,19 @@ def exec14(gen, targetpath):
     numrecs = 0
     for g in gen:
         objClass = creators.File_Brief14(g, 'txt')
-        df = df.append(objClass.FormatRecords())
+        unit_df = objClass.FormatRecords()
+        df = pd.concat([df, unit_df])
         numrecs += 14
-        
+    
+    df.reset_index(inplace=True, drop=True)
     objClass.Filename()
     fname = 'Concentrado14' + "_" + objClass.filename
     targetpath += os.sep + fname
-    
-    df.reset_index(inplace=True, drop=True) # Patch bug at index order since index repeat for every city
     df.to_csv(targetpath, encoding='utf-8',index_label='ID')
     return {"nrecs":numrecs, "filedir":os.path.dirname(targetpath), "filename":os.path.basename(targetpath)}
 
 #--------------------------------------------------------------#
-
-# exec(logic.getPlaces(os.getenv('root')))
+# import logic
+# exec14(logic.getPlaces(os.getenv('root')), '.')
 
 #--------------------------------------------------------------#

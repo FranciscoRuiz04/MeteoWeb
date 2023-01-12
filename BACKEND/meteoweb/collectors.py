@@ -20,7 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import scrappers as scr
 
 # Module importation to be developing
-# from . import scrappers as scr
+# import scrappers as scr
 #--------------------------------------------------------------#
 
 
@@ -95,14 +95,14 @@ class Brief14(ForeteenArray):
         data = scr.ForeteenCast(self.url)
         data.predict()
 
-        df = pd.DataFrame()
-        for i, day in enumerate(data.date):
-            row = {"mm": data.precip['mm'][i], "sd": data.precip['mm_sd'][i],
-                   "%": data.precip['proba'][i], "C_min": data.temp['min'][i],
-                   "C_max": data.temp['max'][i], "Date": day}
-            df = df.append(row, ignore_index=True)
+        # df = pd.DataFrame()
+        # for i, day in enumerate(data.date):
+        unit_df = pd.DataFrame({"mm": data.precip['mm'], "sd": data.precip['mm_sd'],
+                "%": data.precip['proba'], "C_min": data.temp['min'],
+                "C_max": data.temp['max'], "Date": data.date})
+        # df = pd.concat([df, unit_df], ignore_index=True)
         
-        return df
+        return unit_df
 
 
 class DailyArray:
@@ -259,5 +259,6 @@ if __name__ == '__main__':
     import os
     from dotenv import load_dotenv as env
     env()
-    ini = ForeteenArray(os.getenv('starturl'))
+    ini = Brief14(os.getenv('starturl'))
+    # ini = ForeteenArray(os.getenv('starturl'))
     print(ini.genArray())

@@ -11,21 +11,23 @@ __status__ = "Developer"
 ######################       Packages    ##########################
 from tkinter import LEFT, RIGHT, ttk
 import tkinter as tk
-# from dotenv import load_dotenv as env
 
 #-----------------------    GPS Pckgs    ----------------------#
-# env()
 
 ## Module importation to exec file creation
-# from FRONTEND import widgets as wdg
-# from FRONTEND import commands
+from FRONTEND import widgets as wdg
+from FRONTEND import commands
 
 ## Module importation to be developing and distribution
-import sys, os
-sys.path.append(os.getenv('BACKENDMods'))
-sys.path.append(os.getenv('FRONTENDMods'))
-import widgets as wdg
-import commands
+# from dotenv import load_dotenv as env
+# env()
+# import sys, os
+# from dotenv import load_dotenv as env
+# env()
+# sys.path.append(os.getenv('BACKENDMods'))
+# sys.path.append(os.getenv('FRONTENDMods'))
+# import widgets as wdg
+# import commands
 
 def dropping(root):
     root = tk.Toplevel(root)
