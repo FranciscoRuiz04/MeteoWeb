@@ -23,7 +23,11 @@ def importwind(rootmain, daily):
     root.geometry('450x125')
     root.resizable(False, False)
     root.config(bg='#818284')
-    root.title('Resumen')
+    # Window title
+    if daily: num = '7'
+    else: num = '14'
+    root.title(f"Resumen {num} días")
+    
     root.focus_force()
     div1 = wdg.LabelFrame(root)
     div1.pack(fill='x', padx=10, pady=10)
