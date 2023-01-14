@@ -563,7 +563,7 @@ class ForeteenCast:
         maxTag = data['temp-max'][4:8]
 
         # To date format data type
-        week = dateTag + maxTag
+        week = sorted(dateTag + maxTag)
         outcome = [dt.strptime(day + '-' + year, '%m-%d-%Y') for day in week]
         outcome.sort()
         self.date = outcome

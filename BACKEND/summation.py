@@ -14,10 +14,10 @@ import os
 #-----------------------    GPS Pckgs    ----------------------#
 
 ## Module importation to exec file creation and distribution
-# from BACKEND.meteoweb import creators
+from BACKEND.meteoweb import creators
 
 ## Module importation to be developing
-from meteoweb import creators
+# from meteoweb import creators
 #--------------------------------------------------------------#
 
 def exec(gen, targetpath):
@@ -41,9 +41,11 @@ def exec14(gen, targetpath):
     numrecs = 0
     for g in gen:
         objClass = creators.File_Brief14(g, 'txt')
-        df = df.append(objClass.FormatRecords())
+        unit_df = objClass.FormatRecords()
+        df = pd.concat([df, unit_df])
         numrecs += 14
-        
+    
+    df.reset_index(inplace=True, drop=True)
     objClass.Filename()
     fname = 'Concentrado14' + "_" + objClass.filename
     targetpath += os.sep + fname
@@ -53,7 +55,7 @@ def exec14(gen, targetpath):
     return {"nrecs":numrecs, "filedir":os.path.dirname(targetpath), "filename":os.path.basename(targetpath)}
 
 #--------------------------------------------------------------#
-
-# exec(logic.getPlaces(os.getenv('root')))
+# import logic
+# exec14(logic.getPlaces(os.getenv('root')), '.')
 
 #--------------------------------------------------------------#

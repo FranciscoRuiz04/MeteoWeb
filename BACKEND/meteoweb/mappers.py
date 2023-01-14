@@ -1,76 +1,87 @@
-########################    Packages    ########################
+__author__ = "Ulises Francisco Ruiz Gomez"
+__copyright__ = "Copyright 2022, GPS"
+__credits__ = "GPS"
 
-import matplotlib.pyplot as plt
-import geopandas as geopd
+__version__ = "1.0.1"
+__maintainer__ = "Francisco Ruiz"
+__email__ = "franciscoruiz078@gmail.com"
+__status__ = "Developer"
+
+
+########################    Packages    ########################
+from concurrent.futures import ProcessPoolExecutor
+import geopandas as gpd
 import pandas as pd
 import os
+from dotenv import load_dotenv as env
+env()
+
 #-----------------------    GPS Pckgs    ----------------------#
-# Module importation to exec file creation
-# from . import collectors
-# from . import scrappers as scr
-
-# Module importation to be developing
-import scrappers as scr
-import collectors
-#--------------------------------------------------------------#
+import collectors as coll
 
 
-class Attribute(collectors.Brief):
+def urlCoords():
+    """
+    Generator to create a new URL for every coordindates pair
+    extracted from a *.shp file.
+        This object generates a Dictionary format type object
+    as outcome with url for seven and forteen days forecast
+    and its respective (x, y) coordinates pair. Its labels are:\n
+        url7 -> URL to seven days forecast\n
+        url14 -> URL to forteen days forecast\n
+        point -> (x, y) coordinates pair\n
+    """
+    
+    shp = gpd.read_file(os.getenv('shp'))
+    coords = (dict(north=row['POINT_Y'], east=row['POINT_X']) for _, row in shp.iterrows()) #Generator object with every coordinates pair
+    for coord in coords:
+        north = round(coord['north'], 2) #Take only the two first decimals
+        east = round(coord['east'], 2)   #Take only the two first decimals
+        url_7 = "{}/es/tiempo/semana/{}N{}E".format(os.getenv('mainurl'), str(north), str(east))
+        url_14 = "{}/es/tiempo/14-dias/{}N{}E".format(os.getenv('mainurl'), str(north), str(east))
+        yield dict(url7=url_7, url14=url_14, point=[east, north])
 
-    def __init__(self, url):
-        super().__init__(url)
-        self.coords = scr.Daily4cast(url).coords
-
-    def baseArray(self, url, last=False):
-        fulldata = super().baseArray(url, last)
-        outcome = fulldata[:2]
-        return outcome
-
-    def genArray(self, url, last=False):
-        parameters = super().genArray(url, last)
-        row = parameters[1:] + self.coords
-        names = ['Accum_P', 'Tmp_Min', 'Tmp_Max', 'Lat', 'Lon', 'Elev']
-        outcome = {names[n]: value for n, value in enumerate(row)}
-        return outcome
-
-
-class AttributesTable:
-
-    def __init__(self, attObj, genObj):
-        self.__genObj = genObj(os.getenv('root'))
-        self.__attObj = attObj
-
-    def records(self):
-        for loc in self.__genObj:
-            obj = self.__attObj(loc['url'])
-            record = obj.genArray(loc['url'])
-            record['Loc'] = loc['city']
-            yield record
-
-    def genTable(self, export=False):
-        atts = pd.DataFrame()
-        for att in self.records():
-            atts = atts.append(att, ignore_index=True)
-        attTable = geopd.GeoDataFrame(atts,
-                                      geometry=geopd.points_from_xy(atts['Lon'],
-                                                                    atts['Lat'],
-                                                                    atts['Elev']))
-        if export:
-            attTable.to_file('C:\DailyForecast_test\muns_wgs84.shp', driver='ESRI Shapefile')
+class AttsSeven:
+    """
+    
+    """
+    
+    def __init__(self, day, z):
+        self.day = day - 1
+        
+        dictKeys = ['pp', 'p', 'tmin', 'tmax', 'ws', 'wd', 'date']
+        equivalence = dict(zip(dictKeys, range(7)))
+        self.zindex = equivalence[z]
+        
+        if day == 7:
+            self.islast = True
         else:
-            return attTable
+            self.islast = False
+        
+    def getRec(self, location):
+        city = coll.Brief(location['url7'])
+        url = city.urls[self.day]
+        z_value = city.genArray(url, self.islast)
+        coords = location['point']
+        coords.insert(0, z_value[self.zindex])
+        return coords
 
-    def mapping(self):
-        attTable = self.genTable()
-        attTable.plot()
-        plt.show()
+    def getAtts(self):
+        with ProcessPoolExecutor(max_workers=15) as exec:
+            results = exec.map(self.getRec, urlCoords())
+            atts = pd.DataFrame(columns=['value', 'long', 'lat'])
+            for result in results:
+                atts.loc[len(atts)] = result
+        return atts
+
 
 if __name__ == '__main__':
-    import sys
-    from dotenv import load_dotenv as env
-    env()
-    sys.path.append(os.getenv('BACKENDMods'))
-    import logic
+    import time
+    t1 = time.perf_counter()
     
-    ini = AttributesTable(attObj=Attribute, genObj=logic.getPlaces)
-    ini.genTable(True)
+    ini = AttsSeven(2, 'p')
+    
+    print(ini.getAtts().head())
+    t2 = time.perf_counter()
+    print(t2-t1)
+    
