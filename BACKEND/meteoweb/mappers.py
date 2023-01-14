@@ -41,9 +41,23 @@ def urlCoords():
         url_14 = "{}/es/tiempo/14-dias/{}N{}E".format(os.getenv('mainurl'), str(north), str(east))
         yield dict(url7=url_7, url14=url_14, point=[east, north])
 
-class AttsSeven:
+class AttSeven:
     """
+    A object to generate a Dataframe object type with the
+    attributes table format for the next 7 days forecast.
+        Object needs two parameters; day and meteorological
+    variable.
+        day -> Forecast day\n
+        z -> Meteorological variable wanted\n
     
+    Z parameter could take one of the following arguments
+        pp = precipitation probability in percentaje\n
+        p = precipitation in mm\n
+        tmin = minimum temperature in Celcius Degrees\n
+        tmax = maximum temperature in Celius Degrees\n
+        ws = wind speed in kilometres per hour\n
+        wd = wind direction. (NW, NE, SW, SE)\n
+        date = date. (YYYY-MM-DD)\n
     """
     
     def __init__(self, day, z):
@@ -59,6 +73,14 @@ class AttsSeven:
             self.islast = False
         
     def getRec(self, location):
+        """
+        Get a list format type with the respective value
+        and its location coordinates; longitude and latitude.
+        [value, long, lat].
+            Take one parameter which needs to be a dictionary
+        with a key named url7.
+        """
+        
         city = coll.Brief(location['url7'])
         url = city.urls[self.day]
         z_value = city.genArray(url, self.islast)
@@ -67,9 +89,15 @@ class AttsSeven:
         return coords
 
     def getAtts(self):
+        """
+        Get a pandas.Dataframe object with the meteorological
+        values and its respective coordinates (longitude, latitude)
+        pair for every point within a shapefile.
+        """
+        
         with ProcessPoolExecutor(max_workers=15) as exec:
             results = exec.map(self.getRec, urlCoords())
-            atts = pd.DataFrame(columns=['value', 'long', 'lat'])
+            atts = pd.DataFrame(columns=['z_value', 'long', 'lat'])
             for result in results:
                 atts.loc[len(atts)] = result
         return atts
@@ -79,7 +107,7 @@ if __name__ == '__main__':
     import time
     t1 = time.perf_counter()
     
-    ini = AttsSeven(2, 'p')
+    ini = AttSeven(2, 'p')
     
     print(ini.getAtts().head())
     t2 = time.perf_counter()
