@@ -91,8 +91,8 @@ class AttSeven:
     def getAtts(self):
         """
         Get a pandas.Dataframe object with the meteorological
-        values and its respective coordinates (longitude, latitude)
-        pair for every point within a shapefile.
+        values and its respective coordinates pair (longitude,
+        latitude) for every point within a shapefile.
         """
         
         with ProcessPoolExecutor(max_workers=15) as exec:
