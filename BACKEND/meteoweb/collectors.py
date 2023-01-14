@@ -248,6 +248,13 @@ class Brief(DailyArray):
         return pair
 
     def genArray(self, url, last=False):
+        """
+        Runs precipitation and baseArray function concurrently
+        into a Thread pool.
+            Get a list format type object as outcome which has
+        the next format: [probability, mm, Tmin, Tmax, km/h, WinDir
+        , Date]
+        """
         with ThreadPoolExecutor(max_workers=2) as exec:
             pdata = exec.submit(self.precipitation, url).result()
             restdata = exec.submit(self.baseArray, url, last).result()
