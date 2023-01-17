@@ -11,6 +11,8 @@ __status__ = "Developer"
 ########################    Packages    ########################
 from concurrent.futures import ProcessPoolExecutor
 import geopandas as gpd
+import cloupy as cp
+import numpy as np
 import pandas as pd
 import os
 from dotenv import load_dotenv as env
@@ -32,8 +34,8 @@ def urlCoords():
         point -> (x, y) coordinates pair\n
     """
     
-    shp = gpd.read_file(os.getenv('shp'))
-    coords = (dict(north=row['POINT_Y'], east=row['POINT_X']) for _, row in shp.iterrows()) #Generator object with every coordinates pair
+    shp = gpd.read_file(os.getenv('stats'))
+    coords = (dict(north=row['POINT_Y'], east=row['POINT_X']) for _, row in shp.iterrows()) #Gen objt with every coordinates pair
     for coord in coords:
         north = round(coord['north'], 2) #Take only the two first decimals
         east = round(coord['east'], 2)   #Take only the two first decimals
@@ -93,23 +95,46 @@ class AttSeven:
         Get a pandas.Dataframe object with the meteorological
         values and its respective coordinates pair (longitude,
         latitude) for every point within a shapefile.
+            Heads are:\n
+        z_value = Forecasted value
+        lon = Longitude
+        lat = Latitude
         """
         
         with ProcessPoolExecutor(max_workers=15) as exec:
             results = exec.map(self.getRec, urlCoords())
-            atts = pd.DataFrame(columns=['z_value', 'long', 'lat'])
+            atts = pd.DataFrame(columns=['z_value', 'lon', 'lat'])
             for result in results:
                 atts.loc[len(atts)] = result
         return atts
 
 
+class Mappers:
+    """
+    
+    """
+    
+    def __init__(self, day, z):
+        self.attsTable = AttSeven(day, z).getAtts()
+    
+    def toMap(self, method='default'):
+        minVal = self.attsTable['z_value'].min()
+        maxVal = self.attsTable['z_value'].max()
+        imap = cp.m_MapInterpolation(shapefile_path=os.getenv('bounds'), dataframe=self.attsTable, crs='epsg:4326')
+        imap.draw(
+        levels=np.arange(minVal, maxVal + 1, 0.1), # (start, end, step),
+        zoom_in=[(-102.2, -99.6), (19.87, 21.9)],
+        # show_points=True,
+        interpolation_method='cubic',
+        cbar_title='Temperatura Mínima (°C)',
+        title='Pronóstico meteorológico para el estado de Guanajuato\n18 de enero, 2023.',
+        title_ha='center',
+        title_x_position=0.5,
+        save='map_Mappers.png'
+        )
+
+
 if __name__ == '__main__':
-    import time
-    t1 = time.perf_counter()
-    
-    ini = AttSeven(2, 'p')
-    
-    print(ini.getAtts().head())
-    t2 = time.perf_counter()
-    print(t2-t1)
-    
+    ini = Mappers(2, 'tmin')
+    ini.toMap()
+    # ini.getAtts().to_csv('data.csv', index=False)
