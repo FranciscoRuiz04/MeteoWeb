@@ -20,6 +20,7 @@ env()
 
 #-----------------------    GPS Pckgs    ----------------------#
 import collectors as coll
+import interpolation_methods as interpol
 
 
 def urlCoords():
@@ -71,6 +72,7 @@ class AttSeven:
         dictKeys = ['pp', 'p', 'tmin', 'tmax', 'ws', 'wd', 'date']
         equivalence = dict(zip(dictKeys, range(7)))
         self.zindex = equivalence[z]
+        self.z = z
 
         if day == 7:
             self.islast = True
@@ -79,29 +81,31 @@ class AttSeven:
 
     def getRec(self, location):
         """
-        Get a list format type with the respective value
-        and its location coordinates; longitude and latitude.
-        [value, long, lat].
-            Take one parameter which needs to be a dictionary
+        Get a dictionary with two elements.\n
+            attribute -> A list format type object with z values
+        and its location coordinates; longitude and latitude
+        [z_value, long, lat].\n
+            date -> Date data type (YYYY-MM-DD).\n
+            variable -> Meteorological Variable.\n
+            Takes one parameter which needs to be a dictionary
         with a key named url7.
         """
         
+        variables = {'pp':'Probabilidad de Precipitación', 'p':'Precipitación', 'tmin':'Temperatura Mínima', 'tmax':'Temepratura Máxima', 'ws':'Rachas Máximas de Viento', 'wd':'Dirección de Rachas Máximas de Viento', 'date':'Fecha'}
         city = coll.Brief(location['url7'])
         url = city.urls[self.day]
         z_value = city.genArray(url, self.islast)
         coords = location['point']
         coords.insert(0, z_value[self.zindex])
-        return {"attribute":coords, "date":z_value[6]}
+        return {"attribute":coords, "date":z_value[6], "variable":variables[self.z]}
 
     def getAtts(self):
         """
-        Get a pandas.Dataframe object with the meteorological
+        Get a dictionary with two elements.\n
+            attsTable -> pandas.Dataframe object with the meteorological
         values and its respective coordinates pair (longitude,
-        latitude) for every point within a shapefile.
-            Heads are:\n
-        z_value = Forecasted value
-        lon = Longitude
-        lat = Latitude
+        latitude) for every point within a shapefile.\n
+            date -> Date data type (YYYY-MM-DD).
         """
         
         with ProcessPoolExecutor(max_workers=15) as exec:
@@ -112,8 +116,9 @@ class AttSeven:
                 atts.loc[len(atts)] = result['attribute']
                 if n:
                     date = result['date']
+                    variable = result['variable']
                     n = 0
-        return {"attsTable":atts, "date": date}
+        return {"attsTable":atts, "date": date, 'variable': variable}
 
 
 class Mappers:
@@ -125,6 +130,8 @@ class Mappers:
         data = AttSeven(day, z).getAtts()
         self.attsTable = data['attsTable']
         self.date = data['date']
+        self._title = f"Pronóstico Meteorológico para el día {self.date}\n{data['variable']}"
+        
 
     def icubic(self):
         minVal = self.attsTable['z_value'].min()
@@ -142,9 +149,20 @@ class Mappers:
                   cmap='seismic',
                   save='map_Map.png'
                   )
+    
+    def toMap(self, method='kriging', save_path=None):
+        if method != 'kriging':
+            pass
+        else:
+            interData = interpol.Kriging(self.attsTable)
+            interData.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title=self._title, save_path=save_path)
 
 
 if __name__ == '__main__':
     ini = Mappers(2, 'tmin')
-    ini.icubic()
+    ini.toMap(save_path=r'C:\CODES\MeteoWeb\BACKEND\meteoweb\map.png')
     # ini.getAtts().to_csv('data.csv', index=False)
+    
+    # ini = AttSeven(2, 'tmin')
+    # df = ini.getAtts()['attsTable']
+    # df.to_csv('data20.csv')
