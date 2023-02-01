@@ -52,7 +52,7 @@ class Kriging(OrdinaryKriging):
         self.z1, self.ssi = super().execute(style, self.grid_lon, self.grid_lat, mask, backend, n_closest_points)
     
     
-    def genMap(self, shp_path, cramp='seismic', shp_contour_col='black', bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None, title=None, suptitle=None, barlab=None):
+    def genMap(self, shp_path, cramp='seismic', shp_contour_col='black', labelBar=None, bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None, title=None, suptitle=None, barlab=None):
         
         shp = gpd.read_file(shp_path)
         # Contours generation in base interpolated values (z1)
@@ -79,9 +79,9 @@ class Kriging(OrdinaryKriging):
         
         # Styling the map
         minVal = round(np.amin(self.z1))
-        maxVal = round(np.amax(self.z1))
+        maxVal = round(np.amax(self.z1))    
         # midVal = round(np.mean(self.z1))
-        plt.colorbar(contour, label= 'Grados Celsius (°C)', ticks=range(minVal, maxVal + 1, 2))
+        plt.colorbar(contour, label= labelBar, ticks=range(minVal, maxVal + 1, 2))
         plt.clim(minVal, maxVal)
         plt.xlabel('Longitud', fontsize=10)
         plt.ylabel('Latitud', fontsize=10)
@@ -109,4 +109,4 @@ if __name__ == '__main__':
     from dotenv import load_dotenv as env
     env()
     ini = Kriging(pd.read_csv(r'C:\CODES\MeteoWeb\data20.csv'))
-    ini.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title='Pronóstico Meteorológico para el día 2023-01-20\nTemperatura Mínima')
+    ini.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title='Pronóstico Meteorológico para el día 2023-01-20\nTemperatura Mínima', cramp='winter_r')

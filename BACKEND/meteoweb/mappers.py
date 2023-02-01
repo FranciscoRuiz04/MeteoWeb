@@ -19,8 +19,8 @@ from dotenv import load_dotenv as env
 env()
 
 #-----------------------    GPS Pckgs    ----------------------#
-import collectors as coll
-import interpolation_methods as interpol
+from . import collectors as coll
+from . import interpolation_methods as interpol
 
 
 def urlCoords():
@@ -91,13 +91,13 @@ class AttSeven:
         with a key named url7.
         """
         
-        variables = {'pp':'Probabilidad de Precipitación', 'p':'Precipitación', 'tmin':'Temperatura Mínima', 'tmax':'Temepratura Máxima', 'ws':'Rachas Máximas de Viento', 'wd':'Dirección de Rachas Máximas de Viento', 'date':'Fecha'}
+        variables = {'pp':('Probabilidad de Precipitación', '%'), 'p':('Precipitación', 'Milímetros de lluvia (mm)'), 'tmin':('Temperatura Mínima', 'Grados Celsius (°C)'), 'tmax':('Temepratura Máxima', 'Grados Celsius (°C)'), 'ws':('Rachas Máximas de Viento', 'km/h'), 'wd':('Dirección de Rachas Máximas de Viento', ), 'date':('Fecha', )}
         city = coll.Brief(location['url7'])
         url = city.urls[self.day]
         z_value = city.genArray(url, self.islast)
         coords = location['point']
         coords.insert(0, z_value[self.zindex])
-        return {"attribute":coords, "date":z_value[6], "variable":variables[self.z]}
+        return {"attribute":coords, "date":z_value[6], "variable":variables[self.z][0], "units":variables[self.z][1]}
 
     def getAtts(self):
         """
@@ -117,8 +117,9 @@ class AttSeven:
                 if n:
                     date = result['date']
                     variable = result['variable']
+                    units = result['units']
                     n = 0
-        return {"attsTable":atts, "date": date, 'variable': variable}
+        return {"attsTable":atts, "date": date, 'variable': variable, "units": units}
 
 
 class Mappers:
@@ -131,6 +132,7 @@ class Mappers:
         self.attsTable = data['attsTable']
         self.date = data['date']
         self._title = f"Pronóstico Meteorológico para el día {self.date}\n{data['variable']}"
+        self._units = data['units']
         
 
     def icubic(self):
@@ -155,12 +157,12 @@ class Mappers:
             pass
         else:
             interData = interpol.Kriging(self.attsTable)
-            interData.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title=self._title, save_path=save_path)
+            interData.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title=self._title, save_path=save_path, labelBar=self._units)
 
 
 if __name__ == '__main__':
     ini = Mappers(2, 'tmin')
-    ini.toMap(save_path=r'C:\CODES\MeteoWeb\BACKEND\meteoweb\map.png')
+    ini.toMap(save_path=r'C:\Users\Francisco Ruiz\Desktop\map_test.png')
     # ini.getAtts().to_csv('data.csv', index=False)
     
     # ini = AttSeven(2, 'tmin')
