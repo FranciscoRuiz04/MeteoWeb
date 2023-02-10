@@ -9,7 +9,7 @@ __status__ = "Developer"
 
 
 ########################    Packages    ########################
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 import geopandas as gpd
 import cloupy as cp
 import numpy as np
@@ -19,6 +19,11 @@ from dotenv import load_dotenv as env
 env()
 
 #-----------------------    GPS Pckgs    ----------------------#
+# To developing
+# import collectors as coll
+# import interpolation_methods as interpol
+
+# # To exec file creation
 from . import collectors as coll
 from . import interpolation_methods as interpol
 
@@ -91,7 +96,7 @@ class AttSeven:
         with a key named url7.
         """
         
-        variables = {'pp':('Probabilidad de Precipitación', '%'), 'p':('Precipitación', 'Milímetros de lluvia (mm)'), 'tmin':('Temperatura Mínima', 'Grados Celsius (°C)'), 'tmax':('Temepratura Máxima', 'Grados Celsius (°C)'), 'ws':('Rachas Máximas de Viento', 'km/h'), 'wd':('Dirección de Rachas Máximas de Viento', ), 'date':('Fecha', )}
+        variables = {'pp':('Probabilidad de Precipitación', '%'), 'p':('Precipitación', 'Milímetros de lluvia (mm)'), 'tmin':('Temperatura Mínima', 'Grados Celsius (°C)'), 'tmax':('Temperatura Máxima', 'Grados Celsius (°C)'), 'ws':('Rachas Máximas de Viento', 'km/h'), 'wd':('Dirección de Rachas Máximas de Viento', ), 'date':('Fecha', )}
         city = coll.Brief(location['url7'])
         url = city.urls[self.day]
         z_value = city.genArray(url, self.islast)
@@ -107,8 +112,7 @@ class AttSeven:
         latitude) for every point within a shapefile.\n
             date -> Date data type (YYYY-MM-DD).
         """
-        
-        with ProcessPoolExecutor(max_workers=15) as exec:
+        with ThreadPoolExecutor(max_workers=15) as exec:
             results = exec.map(self.getRec, urlCoords())
             atts = pd.DataFrame(columns=['z_value', 'lon', 'lat'])
             n = 1
@@ -161,10 +165,11 @@ class Mappers:
 
 
 if __name__ == '__main__':
-    ini = Mappers(2, 'tmin')
-    ini.toMap(save_path=r'C:\Users\Francisco Ruiz\Desktop\map_test.png')
+    # import pandas as pd
+    ini = Mappers(3, 'tmin')
+    ini.attsTable.to_csv(r'C:\Users\Francisco Ruiz\Desktop\data_min3.csv')
+    # ini.toMap(save_path=r'C:\Users\Francisco Ruiz\Desktop\map_test4.png')
     # ini.getAtts().to_csv('data.csv', index=False)
-    
     # ini = AttSeven(2, 'tmin')
     # df = ini.getAtts()['attsTable']
     # df.to_csv('data20.csv')

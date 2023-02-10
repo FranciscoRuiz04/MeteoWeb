@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -17,17 +17,17 @@ env()
 
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation
-from FRONTEND.winds import main, dropping, fromfile, newrecord, summationwind
-from FRONTEND import widgets as wdg
-from FRONTEND import commands
+# from FRONTEND.winds import main, dropping, fromfile, newrecord, summationwind
+# from FRONTEND import widgets as wdg
+# from FRONTEND import commands
 
 # Module importation to be developing and distribution
-# import sys
-# sys.path.append(os.getenv('BACKENDMods'))
-# sys.path.append(os.getenv('FRONTENDMods'))
-# from winds import main, dropping, fromfile, newrecord, summationwind
-# import widgets as wdg
-# import commands
+import sys
+sys.path.append(os.getenv('BACKENDMods'))
+sys.path.append(os.getenv('FRONTENDMods'))
+from winds import main, dropping, fromfile, newrecord, summationwind, mapping_wind
+import widgets as wdg
+import commands
 #--------------------------------------------------------------#
 
 
@@ -80,6 +80,8 @@ forecast = wdg.MenuBar(statOpts)
 statOpts.add_cascade(label='Pronóstico', menu=forecast)
 forecast.add_command(label='7 días', command=lambda: commands.forecast(root))
 forecast.add_command(label='14 días', command=lambda: commands.foreteenFC(root))
+
+statOpts.add_command(label='Mapa', command= lambda: mapping_wind.importwind(root))
 
 # helpmenu = wdg.MenuBar(menubar)
 # helpmenu.add_command(label="Acerca de")

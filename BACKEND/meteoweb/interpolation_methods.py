@@ -108,5 +108,6 @@ if __name__ == '__main__':
     import pandas as pd
     from dotenv import load_dotenv as env
     env()
-    ini = Kriging(pd.read_csv(r'C:\CODES\MeteoWeb\data20.csv'))
-    ini.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title='Pronóstico Meteorológico para el día 2023-01-20\nTemperatura Mínima', cramp='winter_r')
+    ini = Kriging(pd.read_csv(r'C:\Users\Francisco Ruiz\Desktop\data_02.csv'), enable_statistics=True, enable_plotting=1)
+    ini.print_statistics()
+    # ini.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title='Pronóstico Meteorológico para el día 2023-02-02\nTemperatura Máxima', cramp='winter_r')

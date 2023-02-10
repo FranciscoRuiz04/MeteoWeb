@@ -3,7 +3,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -23,6 +23,7 @@ from FRONTEND import widgets as wdg
 from BACKEND import logic
 from BACKEND import summation
 from BACKEND import main
+from BACKEND.meteoweb import mappers
 
 ## Module importation to distribution
 # import widgets as wdg
@@ -137,6 +138,21 @@ def summarize(root, targetpath, daily):
         ms.showinfo(title="Tarea Finalizada", message=text)
 
 
+def mapping(dir, filename, day, z_value):
+    assert dir and filename != '', ms.showerror(title='Format Error', message='Targetpath has a not valid format')
+    assert day and z_value != '', ms.showerror(title='Empty Parameter', message='Enter valid values into parameters')
+    
+    targetpath = dir + os.path.sep + filename + '.png'
+    
+    try:
+        mappers.Mappers(int(day), z_value).toMap(save_path=targetpath)
+    except AttributeError as e:
+        ms.showerror(title="Format Error", message=e)
+    except:
+        ms.showerror(title='Unknown Error', message="Has occured an error")
+    else:
+        text = f"Mapa {filename} creado en {dir}"
+        ms.showinfo(title="Tarea Finalizada", message=text)
 
 def _getSep(inpSep=None, sep=None):
     # inpSep = [coma, tab, other]
