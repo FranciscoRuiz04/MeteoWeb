@@ -21,7 +21,7 @@ from FRONTEND import commands, widgets as wdg
 def importwind(rootmain):
     # Root window
     root = tk.Toplevel(rootmain)
-    root.geometry('460x230')
+    root.geometry('525x300')
     root.resizable(False, False)
     root.config(bg='#818284')
     # Window title
@@ -55,7 +55,7 @@ def importwind(rootmain):
     h2 = wdg.SectionName(div1, 'Parámetros')
     h2.grid(row=3, column=0, padx=10, pady=3)
     
-    l3 = wdg.EntryName(div1, 'Día')
+    l3 = wdg.EntryName(div1, 'Día:')
     l3.grid(row=4, column=0, pady=7)
     # Day Selection List
     selected_day=tk.StringVar()
@@ -64,7 +64,7 @@ def importwind(rootmain):
     itemsList1['state'] = 'readonly'
     itemsList1.grid(row=4, column=1, sticky='w')
     
-    l4 = wdg.EntryName(div1, 'Variable')
+    l4 = wdg.EntryName(div1, 'Variable:')
     l4.grid(row=4, column=2, pady=7, sticky='w')
     # Meteorological Varaible Selection List
     selected_var=tk.StringVar()
@@ -73,5 +73,22 @@ def importwind(rootmain):
     itemsList1['state'] = 'readonly'
     itemsList1.grid(row=4, column=3, sticky='w')
     
-    sendBtm = wdg.Button(root, 'Listo', lambda: commands.mapping(pathfile2.get(), fileName.get(), selected_day.get(), selected_var.get()))
+    l5 = wdg.EntryName(div1, 'Método:')
+    l5.grid(row=5, column=0, pady=7)
+    # Method choice
+    # -------------------------   Checkbox   ---------------------------
+    # Define empty variables
+    isKrige = tk.IntVar()
+    isIDW = tk.IntVar()
+
+    # Universal Kriging
+    c1 = wdg.CB(div1, 'Kriging', lambda: wdg.checkBx(isKrige, c2), isKrige)
+    c1.grid(row=6, column=1, padx=40)
+
+    # IDW
+    c2 = wdg.CB(div1, 'IDW', lambda: wdg.checkBx(isIDW, c1), isIDW)
+    c2.grid(row=6, column=2, padx=40)
+    
+    # Button
+    sendBtm = wdg.Button(root, 'Listo', lambda: commands.mapping(pathfile2.get(), fileName.get(), selected_day.get(), selected_var.get(), [isKrige.get(), isIDW.get()]))
     sendBtm.pack()

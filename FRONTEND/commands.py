@@ -138,14 +138,14 @@ def summarize(root, targetpath, daily):
         ms.showinfo(title="Tarea Finalizada", message=text)
 
 
-def mapping(dir, filename, day, z_value):
+def mapping(dir, filename, day, z_value, methodList):
     assert dir and filename != '', ms.showerror(title='Format Error', message='Targetpath has a not valid format')
     assert day and z_value != '', ms.showerror(title='Empty Parameter', message='Enter valid values into parameters')
     
     targetpath = dir + os.path.sep + filename + '.png'
     
     try:
-        mappers.Mappers(int(day), z_value).toMap(save_path=targetpath)
+        mappers.Mappers(int(day), z_value).chooseMethod(method=_getMethod(methodList), save_path=targetpath)
     except AttributeError as e:
         ms.showerror(title="Format Error", message=e)
     except:
@@ -161,6 +161,12 @@ def _getSep(inpSep=None, sep=None):
         if b[0]:
             return b[1]
 
+def _getMethod(inpMethod=None):
+    # inpSep = [coma, tab, other]
+    outSep = ['UK', 'IDW']
+    for b in zip(inpMethod, outSep):
+        if b[0]:
+            return b[1]
 
 def masiveAddCommand(pathfile, targetpath, inpSep, sep, encod, headers, numfields):
     if pathfile != '' and targetpath != '':

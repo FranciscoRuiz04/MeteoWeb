@@ -11,6 +11,8 @@ __status__ = "Developer"
 ########################    Packages    ########################
 from concurrent.futures import ThreadPoolExecutor
 import geopandas as gpd
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 import cloupy as cp
 import numpy as np
 import pandas as pd
@@ -133,42 +135,121 @@ class Mappers:
 
     def __init__(self, day, z):
         data = AttSeven(day, z).getAtts()
-        self.attsTable = data['attsTable']
+        self.data = data['attsTable']
+        # self.data = gpd.GeoDataFrame(self.attsTable, geometry=gpd.points_from_xy(self.attsTable['lon'], self.attsTable['lat']))
         self.date = data['date']
         self._title = f"Pronóstico Meteorológico para el día {self.date}\n{data['variable']}"
         self._units = data['units']
+        self.interpolationMethods = dict(OK=interpol.OK, UK=interpol.UK, IDW=None)
+        
+        # Data vectors
+        self.lons = lons = np.array(self.data['lon'])
+        self.lats = lats = np.array(self.data['lat'])
+        self.z_values = np.array(self.data['z_value'])
+        
+        # Grid configuration
+        # Longitude interval
+        xmin_grid = np.amin(lons)
+        xmax_grid = np.amax(lons)
+        self.grid_lon = np.arange(xmin_grid, xmax_grid, 0.01)
+        # Latitude interval
+        ymin_grid = np.amin(lats)
+        ymax_grid = np.amax(lats)
+        self.grid_lat = np.arange(ymin_grid, ymax_grid, 0.01)
         
 
-    def icubic(self):
-        minVal = self.attsTable['z_value'].min()
-        maxVal = self.attsTable['z_value'].max()
-        imap = cp.m_MapInterpolation(shapefile_path=os.getenv(
-            'state'), dataframe=self.attsTable, crs='epsg:4326')
+    def spline(self, save_path, shp_path=None, **kargs):
+        minVal = self.z_values.min()
+        maxVal = self.z_values.max()
+        
+        if 'crs' not in kargs.keys():
+            kargs['crs'] = 'epsg:4326'
+        if shp_path == None:
+            shp_path=os.getenv('state')
+        
+        # Mapping Process
+        imap = cp.m_MapInterpolation(shapefile_path=shp_path, dataframe=self.data, **kargs)
         imap.draw(levels=np.arange(minVal, maxVal + 1, 0.1),
                   zoom_in=[(-102.2, -99.6), (19.87, 21.9)],
-                  # show_points=True,
                   interpolation_method='cubic',
-                  cbar_title='Temperatura Mínima (°C)',
-                  title=f'Pronóstico para el día {self.date}',
+                  cbar_title=self._units,
+                  title=self._title,
                   title_ha='center',
                   title_x_position=0.5,
                   cmap='seismic',
-                  save='map_Map.png'
+                  save=save_path
                   )
     
-    def toMap(self, method='kriging', save_path=None):
-        if method != 'kriging':
-            pass
+    
+    def chooseMethod(self,  method, shp_path=None, cramp='seismic', shp_contour_col='black', bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None):
+        
+        if 'K' in method:
+            # Inteprolation Process
+            interpolClass = self.interpolationMethods[method]
+            methodInstance = interpolClass(self.lons, self.lats, self.z_values)
+            interpolatedValues, _ = methodInstance.interpolateValues(self.grid_lon, self.grid_lat)
+        
+        
+        # Basemap Creation
+        if shp_path == None:
+            shp_path = os.getenv('state')
+        shp = gpd.read_file(shp_path)
+        xintrp, yintrp = np.meshgrid(self.grid_lon, self.grid_lat)    # Generate a meshgrid
+        fig, ax = plt.subplots()    # ax is the plot base area. Multi-plotting.
+        
+        
+        if ncontours == None:
+            ncontours = len(interpolatedValues)
+        contour = plt.contourf(xintrp, yintrp, interpolatedValues, ncontours, cmap=mpl.colormaps[cramp])  # Fourth argument represents contours number
+        shp.plot(ax = ax, color = shp_contour_col)
+        
+        # Plotting state bound and display components
+        if bshp_path == None:
+            bshp = gpd.read_file(os.getenv('bg'))
+        if bshp_contour_col == None:
+            bshp_contour_col = 'black'
+        bshp.plot(ax = ax, color = bshp_contour_col, linewidth = 0.5)
+        
+        
+        # Styling the map
+        minVal = round(np.amin(interpolatedValues))
+        maxVal = round(np.amax(interpolatedValues))    
+        
+        plt.colorbar(contour, label= self._units, ticks=range(minVal, maxVal + 1, 2))
+        plt.clim(minVal, maxVal)
+        plt.xlabel('Longitud', fontsize=10)
+        plt.ylabel('Latitud', fontsize=10)
+        plt.xticks(fontsize=9)
+        plt.yticks(fontsize=9, ticks=[20, 20.5, 21, 21.5], labels=[20.0, 20.5, 21.0, 20.5])
+        plt.annotate('Fuente: meteoblue.com. Mapa Base: Marco Geoestadístico 2020. INEGI. EPSG:4326', ha='left', va='center', xy=(0,-.15), xycoords='axes fraction', fontsize=7)
+        plt.title(self._title, fontsize=11, ha='center')
+        
+        # Zoom in to wanted area
+        plt.axis([np.amin(xintrp), np.amax(xintrp), np.amin(yintrp), np.amax(yintrp)])
+        
+        
+        # Save image
+        if save_path != None:
+            try:
+                components = os.path.splitext(save_path)
+                save_path = components[0] + '.png'
+            except:
+                save_path += '.png'
+            plt.savefig(save_path, dpi=300,bbox_inches='tight')
         else:
-            interData = interpol.Kriging(self.attsTable)
-            interData.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title=self._title, save_path=save_path, labelBar=self._units)
+            plt.show()
+
+
+
+
+
 
 
 if __name__ == '__main__':
     # import pandas as pd
     ini = Mappers(3, 'tmin')
-    ini.attsTable.to_csv(r'C:\Users\Francisco Ruiz\Desktop\data_min3.csv')
-    # ini.toMap(save_path=r'C:\Users\Francisco Ruiz\Desktop\map_test4.png')
+    # ini.chooseMethod('UK')
+    ini.toMap('map1.png')
     # ini.getAtts().to_csv('data.csv', index=False)
     # ini = AttSeven(2, 'tmin')
     # df = ini.getAtts()['attsTable']
