@@ -17,17 +17,18 @@ import cloupy as cp
 import numpy as np
 import pandas as pd
 import os
+import sys
 from dotenv import load_dotenv as env
 env()
 
 #-----------------------    GPS Pckgs    ----------------------#
 # To developing
-# import collectors as coll
-# import interpolation_methods as interpol
+import collectors as coll
+import interpolation_methods as interpol
 
-# # To exec file creation
-from . import collectors as coll
-from . import interpolation_methods as interpol
+# To exec file creation
+# from . import collectors as coll
+# from . import interpolation_methods as interpol
 
 
 def urlCoords():
@@ -114,18 +115,22 @@ class AttSeven:
         latitude) for every point within a shapefile.\n
             date -> Date data type (YYYY-MM-DD).
         """
-        with ThreadPoolExecutor(max_workers=15) as exec:
-            results = exec.map(self.getRec, urlCoords())
-            atts = pd.DataFrame(columns=['z_value', 'lon', 'lat'])
-            n = 1
-            for result in results:
-                atts.loc[len(atts)] = result['attribute']
-                if n:
-                    date = result['date']
-                    variable = result['variable']
-                    units = result['units']
-                    n = 0
-        return {"attsTable":atts, "date": date, 'variable': variable, "units": units}
+        try:
+            with ThreadPoolExecutor(max_workers=15) as exec:
+                results = exec.map(self.getRec, urlCoords())
+                atts = pd.DataFrame(columns=['z_value', 'lon', 'lat'])
+                n = 1
+                for result in results:
+                    atts.loc[len(atts)] = result['attribute']
+                    if n:
+                        date = result['date']
+                        variable = result['variable']
+                        units = result['units']
+                        n = 0
+        except:
+            return None
+        else:
+            return {"attsTable":atts, "date": date, 'variable': variable, "units": units}
 
 
 class Mappers:
@@ -135,8 +140,10 @@ class Mappers:
 
     def __init__(self, day, z):
         data = AttSeven(day, z).getAtts()
+        
+        assert data != None, 'Empty Arrangement'
+        
         self.data = data['attsTable']
-        # self.data = gpd.GeoDataFrame(self.attsTable, geometry=gpd.points_from_xy(self.attsTable['lon'], self.attsTable['lat']))
         self.date = data['date']
         self._title = f"Pronóstico Meteorológico para el día {self.date}\n{data['variable']}"
         self._units = data['units']
@@ -156,9 +163,10 @@ class Mappers:
         ymin_grid = np.amin(lats)
         ymax_grid = np.amax(lats)
         self.grid_lat = np.arange(ymin_grid, ymax_grid, 0.01)
-        
+
 
     def spline(self, save_path, shp_path=None, **kargs):
+        
         minVal = self.z_values.min()
         maxVal = self.z_values.max()
         
@@ -181,63 +189,84 @@ class Mappers:
                   )
     
     
-    def chooseMethod(self,  method, shp_path=None, cramp='seismic', shp_contour_col='black', bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None):
+    def chooseMethod(self,  method, shp_path=None, saveList=None, cramp='seismic', shp_contour_col='black', bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None):
         
-        if 'K' in method:
-            # Inteprolation Process
-            interpolClass = self.interpolationMethods[method]
-            methodInstance = interpolClass(self.lons, self.lats, self.z_values)
-            interpolatedValues, _ = methodInstance.interpolateValues(self.grid_lon, self.grid_lat)
+        # Prevent 0 vector. If there is a forecast equal to zero
+        # for every station won't execute none interpolation method.
+        if sum(self.z_values) == 0:
+            return None
         
-        
-        # Basemap Creation
-        if shp_path == None:
-            shp_path = os.getenv('state')
-        shp = gpd.read_file(shp_path)
-        xintrp, yintrp = np.meshgrid(self.grid_lon, self.grid_lat)    # Generate a meshgrid
-        fig, ax = plt.subplots()    # ax is the plot base area. Multi-plotting.
-        
-        
-        if ncontours == None:
-            ncontours = len(interpolatedValues)
-        contour = plt.contourf(xintrp, yintrp, interpolatedValues, ncontours, cmap=mpl.colormaps[cramp])  # Fourth argument represents contours number
-        shp.plot(ax = ax, color = shp_contour_col)
-        
-        # Plotting state bound and display components
-        if bshp_path == None:
-            bshp = gpd.read_file(os.getenv('bg'))
-        if bshp_contour_col == None:
-            bshp_contour_col = 'black'
-        bshp.plot(ax = ax, color = bshp_contour_col, linewidth = 0.5)
-        
-        
-        # Styling the map
-        minVal = round(np.amin(interpolatedValues))
-        maxVal = round(np.amax(interpolatedValues))    
-        
-        plt.colorbar(contour, label= self._units, ticks=range(minVal, maxVal + 1, 2))
-        plt.clim(minVal, maxVal)
-        plt.xlabel('Longitud', fontsize=10)
-        plt.ylabel('Latitud', fontsize=10)
-        plt.xticks(fontsize=9)
-        plt.yticks(fontsize=9, ticks=[20, 20.5, 21, 21.5], labels=[20.0, 20.5, 21.0, 20.5])
-        plt.annotate('Fuente: meteoblue.com. Mapa Base: Marco Geoestadístico 2020. INEGI. EPSG:4326', ha='left', va='center', xy=(0,-.15), xycoords='axes fraction', fontsize=7)
-        plt.title(self._title, fontsize=11, ha='center')
-        
-        # Zoom in to wanted area
-        plt.axis([np.amin(xintrp), np.amax(xintrp), np.amin(yintrp), np.amax(yintrp)])
-        
-        
-        # Save image
-        if save_path != None:
-            try:
-                components = os.path.splitext(save_path)
-                save_path = components[0] + '.png'
-            except:
-                save_path += '.png'
-            plt.savefig(save_path, dpi=300,bbox_inches='tight')
         else:
-            plt.show()
+            if 'K' in method:
+                # Inteprolation Process
+                interpolClass = self.interpolationMethods[method]
+                methodInstance = interpolClass(self.lons, self.lats, self.z_values)
+                interpolatedValues, _ = methodInstance.interpolateValues(self.grid_lon, self.grid_lat)
+            
+            
+                # Basemap Creation
+                if shp_path == None:
+                    shp_path = os.getenv('state')
+                shp = gpd.read_file(shp_path)
+                xintrp, yintrp = np.meshgrid(self.grid_lon, self.grid_lat)    # Generate a meshgrid
+                fig, ax = plt.subplots()    # ax is the plot base area. Multi-plotting.
+                
+                
+                if ncontours == None:
+                    ncontours = len(interpolatedValues)
+                contour = plt.contourf(xintrp, yintrp, interpolatedValues, ncontours, cmap=mpl.colormaps[cramp])  # Fourth argument represents contours number
+                shp.plot(ax = ax, color = shp_contour_col)
+                
+                # Plotting state bound and display components
+                if bshp_path == None:
+                    bshp = gpd.read_file(os.getenv('bg'))
+                if bshp_contour_col == None:
+                    bshp_contour_col = 'black'
+                bshp.plot(ax = ax, color = bshp_contour_col, linewidth = 0.5)
+                
+                
+                # Styling the map
+                minVal = round(np.amin(interpolatedValues))
+                maxVal = round(np.amax(interpolatedValues))    
+                
+                plt.colorbar(contour, label= self._units, ticks=range(minVal, maxVal + 1, 2))
+                plt.clim(minVal, maxVal)
+                plt.xlabel('Longitud', fontsize=10)
+                plt.ylabel('Latitud', fontsize=10)
+                plt.xticks(fontsize=9)
+                plt.yticks(fontsize=9, ticks=[20, 20.5, 21, 21.5], labels=[20.0, 20.5, 21.0, 20.5])
+                plt.annotate('Fuente: meteoblue.com. Mapa Base: Marco Geoestadístico 2020. INEGI. EPSG:4326', ha='left', va='center', xy=(0,-.15), xycoords='axes fraction', fontsize=7)
+                plt.title(self._title, fontsize=11, ha='center')
+                
+                # Zoom in to wanted area
+                plt.axis([np.amin(xintrp), np.amax(xintrp), np.amin(yintrp), np.amax(yintrp)])
+                
+                
+                # Save image only
+                if save_path == None and saveList == None:
+                    plt.show()
+                
+                elif saveList != None:
+                    try:
+                        init_stout = sys.stdout
+                        with open(saveList[1], 'w') as myfile:
+                            sys.stdout = myfile
+                            methodInstance.print_statistics()
+                        plt.savefig(saveList[0], dpi=300, bbox_inches='tight')
+                    except:
+                        print('Has occured an error. Both files png and txt have not been created.')
+                    finally:
+                        sys.stdout = init_stout
+                
+                else:
+                    try:
+                        components = os.path.splitext(save_path)
+                        save_path = components[0] + '.png'
+                    except:
+                        save_path += '.png'
+                    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+
+
 
 
 
@@ -247,9 +276,9 @@ class Mappers:
 
 if __name__ == '__main__':
     # import pandas as pd
-    ini = Mappers(3, 'tmin')
-    # ini.chooseMethod('UK')
-    ini.toMap('map1.png')
+    ini = Mappers(2, 'tmin')
+    # print(ini.z_values)
+    ini.chooseMethod('UK', saveList=[r'C:/Users/Francisco Ruiz/Desktop/mw/UK.png', r'C:/Users/Francisco Ruiz/Desktop/mw/UK.txt'])
     # ini.getAtts().to_csv('data.csv', index=False)
     # ini = AttSeven(2, 'tmin')
     # df = ini.getAtts()['attsTable']

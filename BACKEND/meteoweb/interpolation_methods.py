@@ -1,7 +1,6 @@
-import cloupy as cp
-import numpy as np
 from pykrige.ok import OrdinaryKriging
 from pykrige.uk import UniversalKriging
+
 
 
 
@@ -25,13 +24,13 @@ class UK(UniversalKriging):
 
 
 
-
-
 if __name__ == '__main__':
     import os
     import pandas as pd
     from dotenv import load_dotenv as env
     env()
-    ini = UK(pd.read_csv(r'C:\Users\Francisco Ruiz\Desktop\data_02.csv'), enable_plotting=1, verbose=1)
-    # ini.print_statistics()
+    df = pd.read_csv(r'C:\Users\Francisco Ruiz\Desktop\data_02.csv')
+    
+    ini = UK(df['lon'], df['lat'], df['z_value'])
+    print(type(ini.print_statistics()))
     # ini.genMap(os.getenv('state'), bshp_path=os.getenv('bg'), title='Pronóstico Meteorológico para el día 2023-02-02\nTemperatura Máxima', cramp='winter_r')
