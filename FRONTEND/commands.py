@@ -24,6 +24,8 @@ from BACKEND import logic
 from BACKEND import summation
 from BACKEND import main
 from BACKEND.meteoweb import mappers
+from BACKEND.meteoweb import creators
+
 
 ## Module importation to distribution
 # import widgets as wdg
@@ -138,20 +140,49 @@ def summarize(root, targetpath, daily):
         ms.showinfo(title="Tarea Finalizada", message=text)
 
 
-def mapping(dir, filename, day, z_value, methodList):
-    assert dir and filename != '', ms.showerror(title='Format Error', message='Targetpath has a not valid format')
-    assert day and z_value != '', ms.showerror(title='Empty Parameter', message='Enter valid values into parameters')
+def mapping(mainDir, z_value, methodList=('UK',)):
+    assert mainDir != '', ms.showerror(title='Empty Parameter', message='Enter a valid value')
     
-    targetpath = dir + os.path.sep + filename + '.png'
+    # File paths generation
+    fileTypes = ['png', 'txt']
+    genFilePaths = (path[1] + os.sep + method for method in methodList for path in creators.pathsIter2Map([1, 4], mainDir))
+    genFiles = [basepath + '.' + fileType for basepath in genFilePaths for fileType in fileTypes]
     
+    parmsList = []
+    n = 0
+    while True:
+        pair = tuple(genFiles[n : n+2])
+        # Assing an intepolation method
+        if n < 6: m = 'UK'  # 6 first items correspon to 'UK' method. Including item number 0.
+        else: m = 'IDW'
+        eachParm = {'path':pair, 'method':m}
+        parmsList.append(eachParm)
+        
+        n += 2
+        if n == 12 or len(methodList) == 1 and n % 6 == 0: break
+    
+    s = 0
+    # e = s + 3
+    parmsDic = {}
+    while True:
+        byFolderList = parmsList[s],
+        # byFolderList = parmsList[s], parmsList[e]
+        parmsDic[s+1] = byFolderList
+        s += 1
+        if s == 3: break
+    # return parmsDic
     try:
-        mappers.Mappers(int(day), z_value).chooseMethod(method=_getMethod(methodList), save_path=targetpath)
+        for day in range(1, 4):
+            myclass = mappers.Mappers(int(day), z_value)
+            for method in parmsDic[day]:
+                methodName = method['method']
+                myclass.chooseMethod(method=methodName, saveList=method['path'])
     except AttributeError as e:
         ms.showerror(title="Format Error", message=e)
     except:
         ms.showerror(title='Unknown Error', message="Has occured an error")
     else:
-        text = f"Mapa {filename} creado en {dir}"
+        text = f"Archivos creados en {mainDir}"
         ms.showinfo(title="Tarea Finalizada", message=text)
 
 def _getSep(inpSep=None, sep=None):
@@ -163,8 +194,8 @@ def _getSep(inpSep=None, sep=None):
 
 def _getMethod(inpMethod=None):
     # inpSep = [coma, tab, other]
-    outSep = ['UK', 'IDW']
-    for b in zip(inpMethod, outSep):
+    outMet = ['UK', 'IDW']
+    for b in zip(inpMethod, outMet):
         if b[0]:
             return b[1]
 
@@ -257,5 +288,9 @@ def brief():
         url = i["url"].split('.com')[-1]
         yield [i["city"], i["path"], url]
 
-# if __name__=='__main__':
+if __name__=='__main__':
+    mapping(r'C:/Users/Francisco Ruiz/Desktop/mw/lluvia_pp', 'tmax')
+    # import pprint
+    # pprint.pprint(mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'tmin'))
+    # print(mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'tmin'))
 #     print(masiveAddCommand(os.getenv('filetest'), os.getenv('absdir'), [0,1,0], None, '', False, [1,2]))

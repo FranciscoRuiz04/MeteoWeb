@@ -17,11 +17,21 @@ import pandas as pd
 from . import collectors
 
 ## Module importation to be developing
-# from . import collectors
+# import collectors
 #--------------------------------------------------------------#
 
 
 ########################    Function    ########################
+
+def pathsIter2Map(ran, mainfolder):
+    threeDays = ('D' + str(day) for day in range(ran[0], ran[1]))
+    filePaths = (mainfolder + os.sep + day for day in threeDays)
+    
+    l = map(lambda x: (os.makedirs(x), x) if os.path.exists(x) == False else (True, x), filePaths)
+    
+    return l
+
+
 
 def isredundant(dfObj, pathfolder):
     try:
@@ -203,10 +213,16 @@ class File_Brief14(File_Brief):
 
 
 
-if __name__ == '__main__':
-    from dotenv import load_dotenv as env
-    env()
-    ini = File_Brief14(os.getenv('json'), 'txt')
-    print(ini.FormatRecords())
+# if __name__ == '__main__':
+    # for p in pathsIter2Map(ran=range(1,4), mainfolder=r'C:/Users/Francisco Ruiz/Desktop/mw'):
+    #     print(p)
+
+    # n = [f for f in pathsIter2Map(ran=range(1,4), mainfolder=r'C:/Users/Francisco Ruiz/Desktop/mw')]
+    
+    # print(n)
+    # from dotenv import load_dotenv as env
+    # env()
+    # ini = File_Brief14(os.getenv('json'), 'txt')
+    # print(ini.FormatRecords())
     # import sys
     # print(sys.getsizeof(next(ini.FormatRecords())))
