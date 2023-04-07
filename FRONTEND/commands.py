@@ -3,7 +3,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -147,7 +147,7 @@ def mapping(mainDir, z_value, methodList=('UK','IDW')):
     fileTypes = ['png', 'txt']
     genFilePaths = (path[1] + os.sep + method for method in methodList for path in creators.pathsIter2Map([1, 4], mainDir))
     genFiles = [basepath + '.' + fileType for basepath in genFilePaths for fileType in fileTypes]
-    
+
     parmsList = []
     n = 0
     while True:
@@ -166,27 +166,30 @@ def mapping(mainDir, z_value, methodList=('UK','IDW')):
     s = 0
     parmsDic = {}
     while True:
-        byFolderList = parmsList[s],
+        byFolderList = parmsList[s], parmsList[s+3]
         parmsDic[s+1] = byFolderList
         s += 1
         if s == 3: break
     # return parmsDic
     try:
+        s,n = 0, 0
         for day in range(1, 4):
-            myclass = mappers.Mappers(int(day), z_value)
+            myclass = mappers.Mappers(day, z_value)
             for method in parmsDic[day]:
                 methodName = method['method']
                 if methodName == 'IDW':
-                    myclass.chooseMethod(method=methodName, save_path=method['path'])
+                    cacher = myclass.chooseMethod(method=methodName, save_path=method['path'])
                 else:
-                    myclass.chooseMethod(method=methodName, saveList=method['path'])
+                    cacher = myclass.chooseMethod(method=methodName, save_list=method['path'])
+    
+                if cacher=='VUD': s += 1
+                elif cacher=='IUD': n += 1
     except AttributeError as e:
         ms.showerror(title="Format Error", message=e)
     except:
         ms.showerror(title='Unknown Error', message="Has occured an error")
-        raise
     else:
-        text = f"Archivos creados en {mainDir}"
+        text = f"Archivos creados en {mainDir}\nVUD: {s}\tIUD: {n}"
         ms.showinfo(title="Tarea Finalizada", message=text)
 
 def _getSep(inpSep=None, sep=None):
@@ -293,7 +296,7 @@ def brief():
         yield [i["city"], i["path"], url]
 
 if __name__=='__main__':
-    print(mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'p'))
+    mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'tmax')
     # import pprint
     # pprint.pprint(mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'tmin'))
     # print(mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'tmin'))

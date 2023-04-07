@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "1.0.1"
+__version__ = "2.0.0"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -24,12 +24,12 @@ env()
 
 #-----------------------    GPS Pckgs    ----------------------#
 # To developing
-import collectors as coll
-import interpolation_methods as interpol
+# import collectors as coll
+# import interpolation_methods as interpol
 
 # To exec file creation
-# from . import collectors as coll
-# from . import interpolation_methods as interpol
+from . import collectors as coll
+from . import interpolation_methods as interpol
 
 
 def urlCoords():
@@ -76,6 +76,7 @@ class AttSeven:
     """
 
     def __init__(self, day, z):
+        assert day > 0, AssertionError
         self.day = day - 1
 
         dictKeys = ['pp', 'p', 'tmin', 'tmax', 'ws', 'wd', 'date']
@@ -140,7 +141,10 @@ class Mappers:
     """
 
     def __init__(self, day, z):
-        data = AttSeven(day, z).getAtts()
+        try:
+            data = AttSeven(day, z).getAtts()
+        except AssertionError:
+            return "Invalid entered day"
         
         assert data != None, 'Empty Arrangement'
         
@@ -191,14 +195,16 @@ class Mappers:
                   )
     
     
-    def chooseMethod(self,  method, shp_path=None, saveList=None, cramp='seismic', shp_contour_col='black', bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None):
+    def chooseMethod(self,  method, shp_path=None, save_list=None, cramp='coolwarm', shp_contour_col='black', bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None):
         
+        if self._variable == 'Precipitación':
+            cramp = 'rainbow'
         # Prevent 0 vector. If there is a forecast equal to zero
         # for every station won't execute none interpolation method.
         if sum(self.z_values) == 0:
-            return None
-        if self._variable == 'Precipitación':
-            cramp = 'rainbow'
+            return 'VUD'
+        elif sum(self.z_values) == None:
+            return 'IUD'
         
         else:
             interpolClass = self.interpolationMethods[method]
@@ -247,13 +253,13 @@ class Mappers:
                 # Points of Interest
                 poi = gpd.read_file(os.getenv('poi'))
                 poi.plot(ax=ax, color='grey', markersize=6) # POIs
-                plt.annotate('San Miguel\nde Allende', ha='left', va='center', xy=(-100.83, 20.97), fontsize=6)
-                plt.annotate('León', ha='left', va='center', xy=(-101.72, 21.15), fontsize=6)
-                plt.annotate('Guanajuato', ha='left', va='center', xy=(-101.36, 21.05), fontsize=6)
-                plt.annotate('Dolores Hidalgo', ha='left', va='center', xy=(-101.05, 21.2), fontsize=6)
-                plt.annotate('San Luis\nde la Paz', ha='left', va='center', xy=(-100.57, 21.35), fontsize=6)
-                plt.annotate('Celaya', ha='left', va='center', xy=(-100.87, 20.56), fontsize=6)
-                plt.annotate('Irapuato', ha='left', va='center', xy=(-101.42, 20.71), fontsize=6)
+                plt.annotate('San Miguel\nde Allende', ha='left', va='center', xy=(-100.83, 20.97), fontsize=4)
+                plt.annotate('León', ha='left', va='center', xy=(-101.72, 21.15), fontsize=4)
+                plt.annotate('Guanajuato', ha='left', va='center', xy=(-101.36, 21.05), fontsize=4)
+                plt.annotate('Dolores Hidalgo', ha='left', va='center', xy=(-101.05, 21.2), fontsize=4)
+                plt.annotate('San Luis\nde la Paz', ha='left', va='center', xy=(-100.57, 21.35), fontsize=4)
+                plt.annotate('Celaya', ha='left', va='center', xy=(-100.87, 20.56), fontsize=4)
+                plt.annotate('Irapuato', ha='left', va='center', xy=(-101.42, 20.71), fontsize=4)
                 
                 
                 # Zoom in to wanted area
@@ -261,17 +267,17 @@ class Mappers:
                 
                 
                 # Show image. This won't export image.
-                if save_path == None and saveList == None:
+                if save_path == None and save_list == None:
                     plt.show()
                 
                 # Export both png image and txt statiscis files.
-                elif saveList != None:
+                elif save_list != None:
                     try:
                         init_stout = sys.stdout
-                        with open(saveList[1], 'w') as myfile:
+                        with open(save_list[1], 'w') as myfile:
                             sys.stdout = myfile
                             methodInstance.print_statistics()
-                        plt.savefig(saveList[0], dpi=300, bbox_inches='tight')
+                        plt.savefig(save_list[0], dpi=300, bbox_inches='tight')
                     except:
                         print('Has occured an error. Both files png and txt have not been created.')
                     finally:
@@ -298,8 +304,6 @@ class Mappers:
                 geo.to_file(aux_path + '.shp') # Create a shp file to use it into pyidw module
                 
                 interpolClass(aux_path + '.shp', os.getenv('window')) # TIF file creation
-                if cramp == 'seismic':
-                    cramp = 'coolwarm'
                 
                 fig, ax, cbar = idw.show_map(
                     input_raster=aux_path + '_idw.tif',
@@ -309,7 +313,7 @@ class Mappers:
                 
                 # Base Map
                 shp = gpd.read_file(os.getenv('state'))
-                shp.plot(ax=ax, color='black', linewidth=3) # State limit
+                shp.plot(ax=ax, color='black', linewidth=2) # State limit
                 bshp = gpd.read_file(os.getenv('bg'))
                 bshp.plot(ax=ax, color='black', linewidth=0.5) # Background map
                 poi = gpd.read_file(os.getenv('poi'))
@@ -348,9 +352,9 @@ class Mappers:
                         for filename in os.listdir(parentfolder):
                             file_path = os.path.join(parentfolder, filename)
                             try:
-                                if (os.path.isfile(file_path) or os.path.islink(parentfolder)) and file_path != save_path:
-                                    os.unlink(file_path)
-                                elif os.path.isdir(file_path):
+                                # if (os.path.isfile(file_path) or os.path.islink(parentfolder)) and file_path != save_path:
+                                #     os.unlink(file_path)
+                                if os.path.isdir(file_path):
                                     shutil.rmtree(file_path)
                             except:
                                 raise
@@ -361,5 +365,5 @@ class Mappers:
 
 
 if __name__ == '__main__':
-    ini = Mappers(2, 'p')
-    ini.chooseMethod('IDW',save_path=r"C:\Users\Francisco Ruiz\Desktop\Test\D1\IDW.png")
+    ini = Mappers(5, 'p')
+    ini.chooseMethod('UK',save_path=r"C:\Users\Francisco Ruiz\Desktop\mw\D1\UKp.png", cramp='coolwarm')
