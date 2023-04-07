@@ -14,9 +14,10 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import cloupy as cp
+from pyidw import idw
 import numpy as np
 import pandas as pd
-import os
+import os, shutil
 import sys
 from dotenv import load_dotenv as env
 env()
@@ -145,9 +146,10 @@ class Mappers:
         
         self.data = data['attsTable']
         self.date = data['date']
-        self._title = f"Pronóstico Meteorológico para el día {self.date}\n{data['variable']}"
+        self._variable = data['variable']
+        self._title = f"Pronóstico Meteorológico para el día {self.date}\n{self._variable}"
         self._units = data['units']
-        self.interpolationMethods = dict(OK=interpol.OK, UK=interpol.UK, IDW=None)
+        self.interpolationMethods = dict(OK=interpol.OK, UK=interpol.UK, IDW=interpol.IDW)
         
         # Data vectors
         self.lons = lons = np.array(self.data['lon'])
@@ -195,11 +197,14 @@ class Mappers:
         # for every station won't execute none interpolation method.
         if sum(self.z_values) == 0:
             return None
+        if self._variable == 'Precipitación':
+            cramp = 'rainbow'
         
         else:
+            interpolClass = self.interpolationMethods[method]
+            
             if 'K' in method:
                 # Inteprolation Process
-                interpolClass = self.interpolationMethods[method]
                 methodInstance = interpolClass(self.lons, self.lats, self.z_values)
                 interpolatedValues, _ = methodInstance.interpolateValues(self.grid_lon, self.grid_lat)
             
@@ -214,6 +219,7 @@ class Mappers:
                 
                 if ncontours == None:
                     ncontours = len(interpolatedValues)
+                
                 contour = plt.contourf(xintrp, yintrp, interpolatedValues, ncontours, cmap=mpl.colormaps[cramp])  # Fourth argument represents contours number
                 shp.plot(ax = ax, color = shp_contour_col)
                 
@@ -238,14 +244,27 @@ class Mappers:
                 plt.annotate('Fuente: meteoblue.com. Mapa Base: Marco Geoestadístico 2020. INEGI. EPSG:4326', ha='left', va='center', xy=(0,-.15), xycoords='axes fraction', fontsize=7)
                 plt.title(self._title, fontsize=11, ha='center')
                 
+                # Points of Interest
+                poi = gpd.read_file(os.getenv('poi'))
+                poi.plot(ax=ax, color='grey', markersize=6) # POIs
+                plt.annotate('San Miguel\nde Allende', ha='left', va='center', xy=(-100.83, 20.97), fontsize=6)
+                plt.annotate('León', ha='left', va='center', xy=(-101.72, 21.15), fontsize=6)
+                plt.annotate('Guanajuato', ha='left', va='center', xy=(-101.36, 21.05), fontsize=6)
+                plt.annotate('Dolores Hidalgo', ha='left', va='center', xy=(-101.05, 21.2), fontsize=6)
+                plt.annotate('San Luis\nde la Paz', ha='left', va='center', xy=(-100.57, 21.35), fontsize=6)
+                plt.annotate('Celaya', ha='left', va='center', xy=(-100.87, 20.56), fontsize=6)
+                plt.annotate('Irapuato', ha='left', va='center', xy=(-101.42, 20.71), fontsize=6)
+                
+                
                 # Zoom in to wanted area
                 plt.axis([np.amin(xintrp), np.amax(xintrp), np.amin(yintrp), np.amax(yintrp)])
                 
                 
-                # Save image only
+                # Show image. This won't export image.
                 if save_path == None and saveList == None:
                     plt.show()
                 
+                # Export both png image and txt statiscis files.
                 elif saveList != None:
                     try:
                         init_stout = sys.stdout
@@ -265,9 +284,76 @@ class Mappers:
                     except:
                         save_path += '.png'
                     plt.savefig(save_path, dpi=300, bbox_inches='tight')
-
-
-
+            
+            else:
+                geo = gpd.GeoDataFrame(self.data, geometry=gpd.points_from_xy(self.data['lon'], self.data['lat']))
+                
+                # Aux Folder
+                aux_folder = os.path.dirname(save_path) + os.sep + '_aux'
+                aux_file = self._variable
+                aux_path = aux_folder + os.sep + aux_file
+                if not os.path.exists(aux_folder):
+                    os.makedirs(aux_folder)
+                
+                geo.to_file(aux_path + '.shp') # Create a shp file to use it into pyidw module
+                
+                interpolClass(aux_path + '.shp', os.getenv('window')) # TIF file creation
+                if cramp == 'seismic':
+                    cramp = 'coolwarm'
+                
+                fig, ax, cbar = idw.show_map(
+                    input_raster=aux_path + '_idw.tif',
+                    return_figure=True,
+                    colormap=cramp
+                    )
+                
+                # Base Map
+                shp = gpd.read_file(os.getenv('state'))
+                shp.plot(ax=ax, color='black', linewidth=3) # State limit
+                bshp = gpd.read_file(os.getenv('bg'))
+                bshp.plot(ax=ax, color='black', linewidth=0.5) # Background map
+                poi = gpd.read_file(os.getenv('poi'))
+                poi.plot(ax=ax, color='grey', markersize=6) # POIs
+                
+                # Styling Map
+                cbar.set_label(self._units, fontsize=13, weight='bold')
+                plt.xlabel('Longitud', fontsize=13, weight='bold')
+                plt.ylabel('Latitud', fontsize=13, weight='bold')
+                plt.xticks(fontsize=12)
+                plt.yticks(fontsize=12, ticks=[20, 20.5, 21, 21.5], labels=[20.0, 20.5, 21.0, 20.5])
+                plt.annotate('Fuente: meteoblue.com. Mapa Base: Marco Geoestadístico 2020. INEGI. EPSG:4326', ha='left', va='center', xy=(0,-.15), xycoords='axes fraction', fontsize=10)
+                
+                # Points of Interest
+                plt.annotate('San Miguel\nde Allende', ha='left', va='center', xy=(-100.83, 20.97), fontsize=6)
+                plt.annotate('León', ha='left', va='center', xy=(-101.72, 21.15), fontsize=6)
+                plt.annotate('Guanajuato', ha='left', va='center', xy=(-101.36, 21.05), fontsize=6)
+                plt.annotate('Dolores Hidalgo', ha='left', va='center', xy=(-101.05, 21.2), fontsize=6)
+                plt.annotate('San Luis\nde la Paz', ha='left', va='center', xy=(-100.57, 21.35), fontsize=6)
+                plt.annotate('Celaya', ha='left', va='center', xy=(-100.87, 20.56), fontsize=6)
+                plt.annotate('Irapuato', ha='left', va='center', xy=(-101.42, 20.71), fontsize=6)
+                
+                plt.title(self._title, fontsize=14, ha='center', weight='bold')
+                
+                plt.axis([-102.18, -99.65, 19.83, 21.95]) # Zoom into Interested Area
+                
+                if save_path == None:
+                    plt.show()
+                else:
+                    try:
+                        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+                    except:
+                        raise
+                    else:
+                        parentfolder = os.path.dirname(save_path)
+                        for filename in os.listdir(parentfolder):
+                            file_path = os.path.join(parentfolder, filename)
+                            try:
+                                if (os.path.isfile(file_path) or os.path.islink(parentfolder)) and file_path != save_path:
+                                    os.unlink(file_path)
+                                elif os.path.isdir(file_path):
+                                    shutil.rmtree(file_path)
+                            except:
+                                raise
 
 
 
@@ -275,11 +361,5 @@ class Mappers:
 
 
 if __name__ == '__main__':
-    # import pandas as pd
-    ini = Mappers(2, 'tmin')
-    # print(ini.z_values)
-    ini.chooseMethod('UK', saveList=[r'C:/Users/Francisco Ruiz/Desktop/mw/UK.png', r'C:/Users/Francisco Ruiz/Desktop/mw/UK.txt'])
-    # ini.getAtts().to_csv('data.csv', index=False)
-    # ini = AttSeven(2, 'tmin')
-    # df = ini.getAtts()['attsTable']
-    # df.to_csv('data20.csv')
+    ini = Mappers(2, 'p')
+    ini.chooseMethod('IDW',save_path=r"C:\Users\Francisco Ruiz\Desktop\Test\D1\IDW.png")

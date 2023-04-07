@@ -140,7 +140,7 @@ def summarize(root, targetpath, daily):
         ms.showinfo(title="Tarea Finalizada", message=text)
 
 
-def mapping(mainDir, z_value, methodList=('UK',)):
+def mapping(mainDir, z_value, methodList=('UK','IDW')):
     assert mainDir != '', ms.showerror(title='Empty Parameter', message='Enter a valid value')
     
     # File paths generation
@@ -154,19 +154,19 @@ def mapping(mainDir, z_value, methodList=('UK',)):
         pair = tuple(genFiles[n : n+2])
         # Assing an intepolation method
         if n < 6: m = 'UK'  # 6 first items correspon to 'UK' method. Including item number 0.
-        else: m = 'IDW'
+        else:
+            m = 'IDW'
+            pair = pair[0]
+        
         eachParm = {'path':pair, 'method':m}
         parmsList.append(eachParm)
         
         n += 2
         if n == 12 or len(methodList) == 1 and n % 6 == 0: break
-    
     s = 0
-    # e = s + 3
     parmsDic = {}
     while True:
         byFolderList = parmsList[s],
-        # byFolderList = parmsList[s], parmsList[e]
         parmsDic[s+1] = byFolderList
         s += 1
         if s == 3: break
@@ -176,11 +176,15 @@ def mapping(mainDir, z_value, methodList=('UK',)):
             myclass = mappers.Mappers(int(day), z_value)
             for method in parmsDic[day]:
                 methodName = method['method']
-                myclass.chooseMethod(method=methodName, saveList=method['path'])
+                if methodName == 'IDW':
+                    myclass.chooseMethod(method=methodName, save_path=method['path'])
+                else:
+                    myclass.chooseMethod(method=methodName, saveList=method['path'])
     except AttributeError as e:
         ms.showerror(title="Format Error", message=e)
     except:
         ms.showerror(title='Unknown Error', message="Has occured an error")
+        raise
     else:
         text = f"Archivos creados en {mainDir}"
         ms.showinfo(title="Tarea Finalizada", message=text)
@@ -289,7 +293,7 @@ def brief():
         yield [i["city"], i["path"], url]
 
 if __name__=='__main__':
-    mapping(r'C:/Users/Francisco Ruiz/Desktop/mw/lluvia_pp', 'tmax')
+    print(mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'p'))
     # import pprint
     # pprint.pprint(mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'tmin'))
     # print(mapping(r'C:/Users/Francisco Ruiz/Desktop/mw', 'tmin'))
