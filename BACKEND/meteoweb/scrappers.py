@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -46,7 +46,7 @@ class Daily4cast:
 
     """
 
-    def __init__(self, url, className="tab active"):
+    def __init__(self, url, className="tab active", day=None):
         self.url = url
         self._class = className
         try:
@@ -55,8 +55,10 @@ class Daily4cast:
             raise Exception("Request failed!")
         else:
             _soup = BeautifulSoup(_req.content, 'html.parser')
-            self.tag = _soup.find(class_=self._class)
-
+            if day == None:
+                self.tag = _soup.find(class_=self._class)
+            else:
+                self.tag = _soup.find("div", {"id": day})
             # Get geographic coordinates
             lat = _soup.find('meta', itemprop='latitude').get('content')
             lon = _soup.find('meta', itemprop='longitude').get('content')
@@ -189,7 +191,7 @@ class Last4cast(Daily4cast):
 
     """
     Daily4Cast object subclass to get information from meteoblue portal
-    about the weather forecast for 6 days after the current date. Parameters
+    about the weather forecast for 7 day after the current date. Parameters
     like min and max temperatures, min and max precipitation, hours with
     sun, wind speed and direction, and forecast date are possible to get.
 
@@ -635,6 +637,7 @@ if __name__ == '__main__':
     import os
     from dotenv import load_dotenv as env
     env()
-    ini = ForeteenCast(os.getenv('starturl'))
-    ini.date_fun()
-    print(ini.date)
+    ini = Daily4cast("https://www.meteoblue.com/es/tiempo/semana/guanajuato_m%c3%a9xico_4005270?day=5",day='day5')
+    # ini = Last4cast("https://www.meteoblue.com/es/tiempo/semana/le%c3%b3n_m%c3%a9xico_3998655?day=7")
+    ini.predict()
+    print(ini.temp)

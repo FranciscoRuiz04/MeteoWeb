@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -116,7 +116,8 @@ class DailyArray:
             if lastday:
                 data = scr.Last4cast(url)
             else:
-                data = scr.Daily4cast(url)
+                day = "day" + url[-1]
+                data = scr.Daily4cast(url, day=day)
             data.predict()
         except:
             dfr = [None for _ in range(9)]
@@ -266,6 +267,8 @@ if __name__ == '__main__':
     import os
     from dotenv import load_dotenv as env
     env()
-    ini = Brief14(os.getenv('starturl'))
+    # ini = Brief14(os.getenv('starturl'))
     # ini = ForeteenArray(os.getenv('starturl'))
+    # print(ini.genArray())
+    ini = DailyArray(os.getenv('starturl'))
     print(ini.genArray())
