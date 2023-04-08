@@ -1,2 +1,1 @@
-from . import logic
-from . import meteoweb
+# Files are running from C:\CODES\MeteoWeb since main file MeteoWeb.py is running as main
