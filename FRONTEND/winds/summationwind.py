@@ -10,10 +10,13 @@ __status__ = "Developer"
 ######################       Packages    ##########################
 
 import tkinter as tk
+import os, sys
+from dotenv import load_dotenv as env
+env()
 #-----------------------    GPS Pckgs    ----------------------#
 
 # Developing
-from FRONTEND import commands, widgets as wdg
+import commands, widgets as wdg
 #--------------------------------------------------------------#
 
 

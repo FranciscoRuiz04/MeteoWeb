@@ -12,9 +12,8 @@ __status__ = "Developer"
 
 import tkinter as tk
 #-----------------------    GPS Pckgs    ----------------------#
-
-from FRONTEND import widgets as wdg
-from FRONTEND import commands
+import widgets as wdg
+import commands
 #--------------------------------------------------------------#
 
 

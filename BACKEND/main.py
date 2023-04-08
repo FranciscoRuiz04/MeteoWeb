@@ -10,14 +10,12 @@ __status__ = "Developer"
 
 ########################    Packages    ########################
 
-import os, sys
+import os
 from dotenv import load_dotenv as env
-sys.path.append(os.getenv('BACKENDMods'))
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
-
-import logic
-from meteoweb import creators
+from BACKEND import logic
+from BACKEND.meteoweb import creators
 #--------------------------------------------------------------#
 env()
 

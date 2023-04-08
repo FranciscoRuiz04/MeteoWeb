@@ -10,16 +10,17 @@ __status__ = "Developer"
 
 ########################    Packages    ########################
 
-import sys
-import os
+import os, sys
 from tkinter import messagebox as ms
 from threading import Thread
 from dotenv import load_dotenv as env
 import tkinter as tk
-sys.path[0] = sys.path[0][:-8]
-#-----------------------    GPS Pckgs    ----------------------#
+env()
+
 ## Module importation to exec file creation
-from FRONTEND import widgets as wdg
+sys.path.append(os.getenv('mainFolder'))
+
+import widgets as wdg
 from BACKEND import logic
 from BACKEND import summation
 from BACKEND import main
@@ -27,25 +28,8 @@ from BACKEND.meteoweb import mappers
 from BACKEND.meteoweb import creators
 
 
-## Module importation to distribution
-# import widgets as wdg
-# from BACKEND import logic
-# from BACKEND import summation
-# from BACKEND import main
-
-# Module importation to develop
-# from BACKEND import logic
-# from BACKEND import summation
-# from BACKEND import main
-# from FRONTEND import widgets as wdg
-
-## Module importation to testing
-# import logic
-# import summation
-# import main
 #--------------------------------------------------------------#
 
-env()
 
 
 def forecast(root):

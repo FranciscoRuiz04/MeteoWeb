@@ -12,12 +12,9 @@ __status__ = "Developer"
 import pandas as pd
 import os
 #-----------------------    GPS Pckgs    ----------------------#
-
-## Module importation to exec file creation and distribution
+## Module importation running from MeteoWeb.py (C:\CODES\MeteoWeb)
 from BACKEND.meteoweb import creators
 
-## Module importation to be developing
-# from meteoweb import creators
 #--------------------------------------------------------------#
 
 def exec(gen, targetpath):

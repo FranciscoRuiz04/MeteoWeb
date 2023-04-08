@@ -17,9 +17,9 @@ from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 #-----------------------    GPS Pckgs    ----------------------#
 # Module importation to exec file creation and distribution
-from . import scrappers as scr
+from BACKEND.meteoweb import scrappers as scr
 
-# Module importation to be developing
+# __name__ == '__main__'
 # import scrappers as scr
 #--------------------------------------------------------------#
 

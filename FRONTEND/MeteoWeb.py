@@ -2,7 +2,7 @@ __author__ = "Ulises Francisco Ruiz Gomez"
 __copyright__ = "Copyright 2022, GPS"
 __credits__ = "GPS"
 
-__version__ = "2.0.2"
+__version__ = "3.0.0"
 __maintainer__ = "Francisco Ruiz"
 __email__ = "franciscoruiz078@gmail.com"
 __status__ = "Developer"
@@ -14,22 +14,17 @@ import tkinter as tk
 import os
 from dotenv import load_dotenv as env
 env()
-
 #-----------------------    GPS Pckgs    ----------------------#
 ## Module importation to exec file creation
-# from FRONTEND.winds import main, dropping, fromfile, newrecord, summationwind
-# from FRONTEND import widgets as wdg
-# from FRONTEND import commands
-
-# Module importation to be developing and distribution
-import sys
-sys.path.append(os.getenv('BACKENDMods'))
-sys.path.append(os.getenv('FRONTENDMods'))
-from winds import main, dropping, fromfile, newrecord, summationwind, mapping_wind
+from winds import main
+from winds import dropping
+from winds import fromfile
+from winds import newrecord
+from winds import summationwind
+from winds import mapping_wind
 import widgets as wdg
-import commands
+import commands as commands
 #--------------------------------------------------------------#
-
 
 ######################       Root window    ##########################
 root = tk.Tk()

@@ -13,7 +13,7 @@ import tkinter as tk
 #-----------------------    GPS Pckgs    ----------------------#
 
 # Developing
-from FRONTEND import commands, widgets as wdg
+import commands, widgets as wdg
 #--------------------------------------------------------------#
 
 
