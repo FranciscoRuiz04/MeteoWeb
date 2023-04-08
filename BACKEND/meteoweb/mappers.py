@@ -13,7 +13,6 @@ from concurrent.futures import ThreadPoolExecutor
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import cloupy as cp
 from pyidw import idw
 import numpy as np
 import pandas as pd
@@ -21,15 +20,14 @@ import os, shutil
 import sys
 from dotenv import load_dotenv as env
 env()
-
 #-----------------------    GPS Pckgs    ----------------------#
-# To developing
+# To exec file creation
+from BACKEND.meteoweb import collectors as coll
+from BACKEND.meteoweb import interpolation_methods as interpol
+
+# __name__ == '__main__'
 # import collectors as coll
 # import interpolation_methods as interpol
-
-# To exec file creation
-from . import collectors as coll
-from . import interpolation_methods as interpol
 
 
 def urlCoords():
@@ -169,30 +167,6 @@ class Mappers:
         ymin_grid = np.amin(lats)
         ymax_grid = np.amax(lats)
         self.grid_lat = np.arange(ymin_grid, ymax_grid, 0.01)
-
-
-    def spline(self, save_path, shp_path=None, **kargs):
-        
-        minVal = self.z_values.min()
-        maxVal = self.z_values.max()
-        
-        if 'crs' not in kargs.keys():
-            kargs['crs'] = 'epsg:4326'
-        if shp_path == None:
-            shp_path=os.getenv('state')
-        
-        # Mapping Process
-        imap = cp.m_MapInterpolation(shapefile_path=shp_path, dataframe=self.data, **kargs)
-        imap.draw(levels=np.arange(minVal, maxVal + 1, 0.1),
-                  zoom_in=[(-102.2, -99.6), (19.87, 21.9)],
-                  interpolation_method='cubic',
-                  cbar_title=self._units,
-                  title=self._title,
-                  title_ha='center',
-                  title_x_position=0.5,
-                  cmap='seismic',
-                  save=save_path
-                  )
     
     
     def chooseMethod(self,  method, shp_path=None, save_list=None, cramp='coolwarm', shp_contour_col='black', bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None):
@@ -241,14 +215,14 @@ class Mappers:
                 minVal = round(np.amin(interpolatedValues))
                 maxVal = round(np.amax(interpolatedValues))    
                 
-                plt.colorbar(contour, label= self._units, ticks=range(minVal, maxVal + 1, 2))
+                plt.colorbar(contour, ticks=range(minVal, maxVal + 1, 2)).set_label(label=self._units, weight='bold')
                 plt.clim(minVal, maxVal)
-                plt.xlabel('Longitud', fontsize=10)
-                plt.ylabel('Latitud', fontsize=10)
+                plt.xlabel('Longitud', fontsize=10, weight='bold')
+                plt.ylabel('Latitud', fontsize=10, weight='bold')
                 plt.xticks(fontsize=9)
                 plt.yticks(fontsize=9, ticks=[20, 20.5, 21, 21.5], labels=[20.0, 20.5, 21.0, 20.5])
                 plt.annotate('Fuente: meteoblue.com. Mapa Base: Marco Geoestadístico 2020. INEGI. EPSG:4326', ha='left', va='center', xy=(0,-.15), xycoords='axes fraction', fontsize=7)
-                plt.title(self._title, fontsize=11, ha='center')
+                plt.title(self._title, fontsize=11, ha='center', weight='bold')
                 
                 # Points of Interest
                 poi = gpd.read_file(os.getenv('poi'))
@@ -366,4 +340,4 @@ class Mappers:
 
 if __name__ == '__main__':
     ini = Mappers(5, 'p')
-    ini.chooseMethod('UK',save_path=r"C:\Users\Francisco Ruiz\Desktop\mw\D1\UKp.png", cramp='coolwarm')
+    ini.chooseMethod('UK')
