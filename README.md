@@ -1,5 +1,5 @@
 # **Project Description**
-** *MeteoWeb* ** is a software developed on Python by Ruiz Gomez Ulises Francisco, a Geomatic Engineering BA Degree student with the support of teacher Esquivel Longoria Marcos Irineo to semi-automatic meteorological forecasts gathering, getting as outcome text files with tabular format and semi-automatic meteorological variable maps such as rain, tempeature and wind forecasted for points into Guanajuato state administrative boundaries.
+** _MeteoWeb_ ** is a software developed on Python by Ruiz Gomez Ulises Francisco, a Geomatic Engineering BA Degree student with the support of teacher Esquivel Longoria Marcos Irineo to semi-automatic meteorological forecasts gathering, getting as outcome text files with tabular format and semi-automatic meteorological variable maps such as rain, tempeature and wind forecasted for points into Guanajuato state administrative boundaries.
 
 *The main goal of the software is a Social Service Project given at Meteorological Observatory of Guanajuato University as part of Geomatic Engineering Bachelor Degree graduation process.*
 
