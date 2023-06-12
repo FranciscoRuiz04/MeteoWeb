@@ -19,7 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 # Module importation to exec file creation and distribution
 from BACKEND.meteoweb import scrappers as scr
 
-# __name__ == '__main__'
+## Dev module import
 # import scrappers as scr
 #--------------------------------------------------------------#
 

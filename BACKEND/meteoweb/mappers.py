@@ -25,6 +25,11 @@ env()
 from BACKEND.meteoweb import collectors as coll
 from BACKEND.meteoweb import interpolation_methods as interpol
 
+
+# # Dev module import
+# import interpolation_methods as interpol
+# import collectors as coll
+
 # __name__ == '__main__'
 # import collectors as coll
 # import interpolation_methods as interpol
@@ -172,7 +177,26 @@ class Mappers:
     def chooseMethod(self,  method, shp_path=None, save_list=None, cramp='coolwarm', shp_contour_col='black', bshp_path=None, save_path=None, ncontours=None, bshp_contour_col=None):
         
         if self._variable == 'Precipitación':
-            cramp = 'rainbow'
+            cdict = {
+                "red": (
+                    (0.0, 1.0, 1.0),
+                    (1/3*2, 0.0, 0.0),
+                    (1.0, 1.0, 1.0)
+                ),
+                "green": (
+                    (0.0, 1.0, 1.0),
+                    (1/3*2, 0.0, 0.0),
+                    (1.0, 0.0, 0.0)
+                ),
+                "blue": (
+                    (0.0, 1.0, 1.0),
+                    (1/3*2, 1.0, 1.0),
+                    (1.0, 0.0, 0.0)
+                )
+            }
+            cmap = mpl.colors.LinearSegmentedColormap('p', segmentdata=cdict)
+        else:
+            cmap = mpl.colormaps[cramp]
         # Prevent 0 vector. If there is a forecast equal to zero
         # for every station won't execute none interpolation method.
         if sum(self.z_values) == 0:
@@ -200,7 +224,7 @@ class Mappers:
                 if ncontours == None:
                     ncontours = len(interpolatedValues)
                 
-                contour = plt.contourf(xintrp, yintrp, interpolatedValues, ncontours, cmap=mpl.colormaps[cramp])  # Fourth argument represents contours number
+                contour = plt.contourf(xintrp, yintrp, interpolatedValues, ncontours, cmap=cmap)  # Fourth argument represents contours number
                 shp.plot(ax = ax, color = shp_contour_col)
                 
                 # Plotting state bound and display components
@@ -282,7 +306,7 @@ class Mappers:
                 fig, ax, cbar = idw.show_map(
                     input_raster=aux_path + '_idw.tif',
                     return_figure=True,
-                    colormap=cramp
+                    colormap='p'
                     )
                 
                 # Base Map
@@ -339,5 +363,5 @@ class Mappers:
 
 
 if __name__ == '__main__':
-    ini = Mappers(5, 'p')
-    ini.chooseMethod('UK')
+    ini = Mappers(1, 'p')
+    ini.chooseMethod('IDW',save_path=r"C:\Users\Francisco Ruiz\Desktop\Testing\IDW")
